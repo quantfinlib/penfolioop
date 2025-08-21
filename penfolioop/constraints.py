@@ -1,0 +1,408 @@
+# Copyright (c) 2025 Mohammadjavad Vakili. All rights reserved.
+
+"""Portfolio constraint generation module.
+
+This module provides functionality for generating optimization constraints
+for portfolio management, including asset weight constraints and other
+portfolio-specific limitations.
+"""
+
+from __future__ import annotations
+
+from typing import Any, Literal, Self
+
+import cvxpy as cp
+import numpy as np
+from pydantic import BaseModel, ValidationError, field_validator, model_validator
+
+
+class AssetConstraint(BaseModel):
+    """Model for validating individual asset constraints."""
+
+    left_indices: list[str]
+    operator: Literal["==", "<=", ">=", "<", ">"]
+    right_value: float | None = None
+    right_indices: list[str] | None = None
+
+    # Validator for left_indices
+    @field_validator("left_indices")
+    @classmethod
+    def validate_left_indices(cls, v: list[str]) -> list[str]:
+        """Ensure left_indices is not empty.
+
+        Parameters
+        ----------
+        v : list[str]
+            List of asset names for the left-hand side of the constraint.
+
+        Returns
+        -------
+        list[str]
+            Validated list of asset names.
+
+        Raises
+        ------
+        ValueError
+            If left_indices is empty or contains duplicate names.
+
+        """
+        if not v:
+            msg = "left_indices must not be empty"
+            raise ValueError(msg)
+        if len(v) != len(set(v)):
+            msg = "Asset names in left_indices must be unique"
+            raise ValueError(msg)
+        return v
+
+    # Validator for the operator
+    @field_validator("operator")
+    @classmethod
+    def validate_operator(cls, v: Literal["==", "<=", ">=", "<", ">"]) -> Literal["==", "<=", ">=", "<", ">"]:
+        """Ensure operator is one of the allowed values.
+
+        Parameters
+        ----------
+        v : Literal["==", "<=", ">=", "<", ">"]
+            The operator to validate.
+
+        Returns
+        -------
+        Literal["==", "<=", ">=", "<", ">"]
+            Validated operator.
+
+        Raises
+        ------
+        ValueError
+            If the operator is not one of the allowed values.
+
+        """
+        allowed_operators = {"==", "<=", ">=", "<", ">"}
+        if v not in allowed_operators:
+            msg = f"Operator must be one of {allowed_operators}, got {v}"
+            raise ValueError(msg)
+        return v
+
+    # Validator for the right_indices in the right side of the constraint
+    @field_validator("right_indices")
+    @classmethod
+    def validate_right_indices(cls, v: list[str] | None) -> list[str] | None:
+        """Ensure right_indices is not empty and contains unique names.
+
+        Parameters
+        ----------
+        v : list[str] | None
+            List of asset names for the right-hand side of the constraint.
+
+        Returns
+        -------
+        list[str] | None
+            Validated list of asset names or None if not provided.
+
+        Raises
+        ------
+        ValueError
+            If right_indices is not None and is empty or contains duplicate names.
+
+
+        """
+        if v is not None and not v:
+            msg = "right_indices must not be empty if provided"
+            raise ValueError(msg)
+        if v is not None and len(v) != len(set(v)):
+            msg = "Asset names in right_indices must be unique"
+            raise ValueError(msg)
+        return v
+
+    # Validator for the right_value in the right side of the constraint
+    @field_validator("right_value")
+    @classmethod
+    def validate_right_value(cls, v: float | None) -> float | None:
+        """Ensure right_value is a non-negative number if provided.
+
+        Parameters
+        ----------
+        v : float | None
+            The right-hand side value of the constraint.
+
+        Returns
+        -------
+        float | None
+            Validated right value or None if not provided.
+
+        Raises
+        ------
+        ValueError
+            If right_value is not None and is not a number or is negative.
+
+        """
+        if v is not None and not isinstance(v, (int, float)):
+            msg = "right_value must be a number if provided"
+            raise ValueError(msg)
+        if v is not None and (v < 0 or v > 1):
+            msg = "right_value must be between 0 and 1 if provided"
+            raise ValueError(msg)
+        return float(v) if v is not None else None
+
+    # Validator to ensure either right_value or right_indices is provided, but not both
+    @model_validator(mode="after")
+    def validate_right_side(self) -> Self:
+        """Ensure that either right_value or right_indices is provided, but not both.
+
+        Returns
+        -------
+        Self
+            The validated AssetConstraint instance.
+
+        Raises
+        ------
+        ValueError
+            If neither right_value nor right_indices is provided, or if both are provided.
+
+        """
+        right_value = self.right_value
+        right_indices = self.right_indices
+        if right_value is None and right_indices is None:
+            msg = "Either right_value or right_indices must be provided"
+            raise ValueError(msg)
+        if right_value is not None and right_indices is not None:
+            msg = "Only one of right_value or right_indices can be provided"
+            raise ValueError(msg)
+        return self
+
+
+def _check_constraints(constraints: list[dict[str, Any]]) -> None:
+    """Check if the constraints are valid.
+
+    Parameters
+    ----------
+    constraints : list[dict[str, Any]]
+        The asset constraints to validate.
+
+    Raises
+    ------
+    ValueError
+        If the constraint is invalid.
+
+    """
+    try:
+        for constraint in constraints:
+            AssetConstraint(**constraint)
+    except ValidationError as e:
+        msg = f"Invalid constraint: {e}"
+        raise ValueError(msg) from e
+
+
+def _process_left_side_of_constraint(
+    portfolio_weights: cp.Variable,
+    left_indices: list[str],
+    asset_indices: dict[str, int],
+) -> cp.Expression:
+    """Process the left-hand side of the constraint.
+
+    Parameters
+    ----------
+    portfolio_weights : cp.Variable
+        The variable representing the portfolio weights.
+    left_indices : list[str]
+        List of asset names for the left-hand side of the constraint.
+    asset_indices : dict[str, int]
+        Dictionary mapping asset names to their indices in the portfolio weights.
+
+    Returns
+    -------
+    cp.Expression
+        The left-hand side expression of the constraint.
+
+    """
+    left_vec = np.zeros(len(asset_indices))
+    for idx in left_indices:
+        left_vec[asset_indices[idx]] = 1
+    return left_vec @ portfolio_weights
+
+
+def _process_right_side_of_constraint(
+    portfolio_weights: cp.Variable,
+    asset_indices: dict[str, int],
+    right_value: float | None = None,
+    right_indices: list[str] | None = None,
+) -> cp.Expression | float:
+    """Process the right-hand side of the constraint.
+
+    Parameters
+    ----------
+    portfolio_weights : cp.Variable
+        The variable representing the portfolio weights.
+    asset_indices : dict[str, int]
+        Dictionary mapping asset names to their indices in the portfolio weights.
+    right_value : float | None, optional
+        The right-hand side value of the constraint.
+    right_indices : list[str] | None, optional
+        List of asset names for the right-hand side of the constraint.
+
+    Returns
+    -------
+    cp.Expression | float
+        The right-hand side expression of the constraint or a float if right_value is provided.
+
+    Raises
+    ------
+    ValueError
+        If neither right_value nor right_indices is provided, or if both are provided.
+
+    """
+    if right_value is not None:
+        return right_value
+    if right_indices is not None:
+        right_vec = np.zeros(len(asset_indices))
+        for idx in right_indices:
+            right_vec[asset_indices[idx]] = 1
+        return right_vec @ portfolio_weights
+    msg = "Constraint must have either 'right_value' or 'right_indices'."
+    raise ValueError(msg)
+
+
+def _process_operator(
+    operator: Literal["==", "<=", ">=", "<", ">"],
+    left_expr: cp.Expression,
+    right_expr: cp.Expression | float,
+) -> cp.Constraint:
+    """Process the operator and return the corresponding constraint.
+
+    Parameters
+    ----------
+    operator : Literal["==", "<=", ">=", "<", ">"]
+        The operator to apply to the left and right expressions.
+
+    left_expr : cp.Expression
+        The left-hand side expression of the constraint.
+
+    right_expr : cp.Expression | float
+        The right-hand side expression of the constraint or a float if right_value is provided.
+
+    Returns
+    -------
+    cp.Constraint
+        The constraint corresponding to the operator applied to the left and right expressions.
+
+    Raises
+    ------
+    ValueError
+        If the operator is not one of the allowed values.
+
+    """
+    if operator == "==":
+        return left_expr == right_expr
+    if operator == "<=":
+        return left_expr <= right_expr
+    if operator == ">=":
+        return left_expr >= right_expr
+    if operator == "<":
+        return left_expr < right_expr
+    if operator == ">":
+        return left_expr > right_expr
+    msg = f"Unknown operator: {operator}"
+    raise ValueError(msg)
+
+
+def generate_constraints(
+    portfolio_weights: cp.Variable,
+    asset_names: list[str],
+    asset_constraints: list[dict[str, Any]],
+) -> list[cp.Constraint]:
+    """Generate constraints for the portfolio optimization problem.
+
+    Parameters
+    ----------
+    portfolio_weights : cp.Variable
+        The variable representing the portfolio weights.
+    asset_names : list[str]
+        List of asset names in the portfolio.
+    asset_constraints : list[dict[str, Any]]
+        List of asset constraints to apply to the portfolio weights.
+
+    Returns
+    -------
+    list[cp.Constraint]
+        List of cvxpy constraints generated from the asset constraints.
+
+    """
+    constraints: list[cp.Constraint] = []
+
+    _check_constraints(constraints=asset_constraints)
+    asset_indices: dict[str, int] = {name: i for i, name in enumerate(asset_names)}
+    for constraint in asset_constraints:
+        # Process left-hand-side of the constraint
+        left_expr = _process_left_side_of_constraint(
+            portfolio_weights=portfolio_weights,
+            left_indices=constraint["left_indices"],
+            asset_indices=asset_indices,
+        )
+        # process right-hand-side of the constraint
+        right_expr: cp.Expression | float = _process_right_side_of_constraint(
+            portfolio_weights=portfolio_weights,
+            right_value=constraint.get("right_value"),
+            right_indices=constraint.get("right_indices"),
+            asset_indices=asset_indices,
+        )
+        # Process the operator
+        cp_constraint: cp.Constraint = _process_operator(
+            operator=constraint["operator"],
+            left_expr=left_expr,
+            right_expr=right_expr,
+        )
+        constraints.append(cp_constraint)
+
+    return constraints
+
+
+def generate_scipy_constraints(
+    asset_constraints: list[dict[str, Any]],
+    asset_names: list[str],
+) -> list[dict[str, Any]]:
+    """Generate constraints for scipy optimization.
+
+    Parameters
+    ----------
+    asset_constraints : list[dict[str, Any]]
+        List of asset constraints to apply to the portfolio weights.
+    asset_names : list[str]
+        List of asset names in the portfolio.
+
+    Returns
+    -------
+    list[dict[str, Any]]
+        List of constraints formatted for scipy optimization.
+
+    """
+    _check_constraints(constraints=asset_constraints)
+    asset_indices: dict[str, int] = {name: i for i, name in enumerate(asset_names)}
+    scipy_constraints = []
+
+    for constraint in asset_constraints:
+        def constraint_fun(x, constraint=constraint):  # noqa: ANN001, ANN202
+            # Calculate left side
+            left_value = sum(x[asset_indices[idx]] for idx in constraint["left_indices"])
+
+            # Calculate right side
+            if constraint.get("right_value") is not None:
+                right_value = constraint["right_value"]
+            else:
+                right_value = sum(x[asset_indices[idx]] for idx in constraint["right_indices"])
+
+            # Return constraint value based on operator
+            if constraint["operator"] in {"<=", "<"}:
+                return right_value - left_value
+            if constraint["operator"] in {">=", ">"}:
+                return left_value - right_value
+            if constraint["operator"] == "==":
+                return left_value - right_value
+            msg = f"Unsupported operator: {constraint['operator']}"
+            raise ValueError(msg)
+
+        constraint_type = "ineq" if constraint["operator"] in {"<=", ">=", ">", "<"} else "eq"
+        scipy_constraints.append({
+            "type": constraint_type,
+            "fun": constraint_fun,
+        })
+
+    return scipy_constraints

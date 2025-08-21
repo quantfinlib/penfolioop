@@ -1,0 +1,27 @@
+[project]
+name = "penfolioop"
+version = "0.1.0"
+description = "Portfolio Optimization for Pension Funds"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["numpy", "pandas", "cvxpy","pydantic"]
+
+
+[project.optional-dependencies]
+dev = [
+  "ruff==0.9.10",
+  "pre-commit==4.1.0",
+]
+docs = [
+    "pdoc3",
+    "matplotlib",
+    "nbformat==5.4.0",
+    "ipython", 
+    "notebook", 
+    "ipywidgets"
+]
+tests = [
+    "pytest",
+    "pytest-cov",
+]
+

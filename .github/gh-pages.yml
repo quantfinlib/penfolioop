@@ -1,0 +1,39 @@
+name: Update Documentation
+
+on:
+  push:
+    branches: 
+      - main
+      - '*'
+  pull_request:
+    branches: [main]
+  release:
+    types:
+      - published
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.1
+      - name: Install dependencies 🔧
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv python install 3.11
+          uv venv --python 3.11
+          source .venv/bin/activate
+          uv pip install -e .[docs]
+
+      - name: Build api with pdoc3
+        run: uv run pdoc --html  -c latex_math=True --output-dir docs --force penfolioop
+
+      - name: Build static HTML pages for Jupyter notebooks
+        run: uv run jupyter nbconvert --to html --execute --allow-errors docs/*.ipynb
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: docs # The folder the action should deploy.
+          token: ${{ secrets.GH_ACTION_PAT }}
