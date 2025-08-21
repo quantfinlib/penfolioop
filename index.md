@@ -1,0 +1,30 @@
+# PenFolioOp
+
+
+[🌐 **GitHub**](https://github.com/quantfinlib/penfolioop)
+
+[📖 **Documentation**](https://quantfinlib.github.io/penfolioop/)
+&nbsp;&nbsp;&nbsp; [🔗 **API**](penfolioop)
+&nbsp;&nbsp;&nbsp; [📖 **Docs**](https://quantfinlib.github.io/penfolioop/)
+
+
+## Getting Started
+
+* [Basic example with synthetic data](Example_Synthetic_data.html)
+
+
+## Documentation
+
+The documentation is available at [githubpages](https://quantfinlib.github.io/penfolioop/).
+The [🔗 API documentation](penfolioop) is generated using [pdoc3](https://pdoc3.github.io/pdoc/).
+
+To manually generate the documentation, first, install the penfolioop package with the doc dependencies using `uv`:
+
+```bash
+$ uv pip install -e .[docs]
+```
+
+Then
+```bash
+$ uv run pdoc --html  -c latex_math=True --output-dir docs --force penfolioop
+```

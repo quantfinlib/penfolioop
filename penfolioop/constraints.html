@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>penfolioop.constraints API documentation</title>
+<meta name="description" content="Portfolio constraint generation module …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script type="text/x-mathjax-config">MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });</script>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML" integrity="sha256-kZafAc6mZvK3W3v1pHOcUix30OHQN6pU/NO2oFkqZVw=" crossorigin></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>penfolioop.constraints</code></h1>
+</header>
+<section id="section-intro">
+<p>Portfolio constraint generation module.</p>
+<p>This module provides functionality for generating optimization constraints
+for portfolio management, including asset weight constraints and other
+portfolio-specific limitations.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="penfolioop.constraints.generate_constraints"><code class="name flex">
+<span>def <span class="ident">generate_constraints</span></span>(<span>portfolio_weights: cp.Variable,<br>asset_names: list[str],<br>asset_constraints: list[dict[str, Any]]) ‑> list[cvxpy.constraints.constraint.Constraint]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_constraints(
+    portfolio_weights: cp.Variable,
+    asset_names: list[str],
+    asset_constraints: list[dict[str, Any]],
+) -&gt; list[cp.Constraint]:
+    &#34;&#34;&#34;Generate constraints for the portfolio optimization problem.
+
+    Parameters
+    ----------
+    portfolio_weights : cp.Variable
+        The variable representing the portfolio weights.
+    asset_names : list[str]
+        List of asset names in the portfolio.
+    asset_constraints : list[dict[str, Any]]
+        List of asset constraints to apply to the portfolio weights.
+
+    Returns
+    -------
+    list[cp.Constraint]
+        List of cvxpy constraints generated from the asset constraints.
+
+    &#34;&#34;&#34;
+    constraints: list[cp.Constraint] = []
+
+    _check_constraints(constraints=asset_constraints)
+    asset_indices: dict[str, int] = {name: i for i, name in enumerate(asset_names)}
+    for constraint in asset_constraints:
+        # Process left-hand-side of the constraint
+        left_expr = _process_left_side_of_constraint(
+            portfolio_weights=portfolio_weights,
+            left_indices=constraint[&#34;left_indices&#34;],
+            asset_indices=asset_indices,
+        )
+        # process right-hand-side of the constraint
+        right_expr: cp.Expression | float = _process_right_side_of_constraint(
+            portfolio_weights=portfolio_weights,
+            right_value=constraint.get(&#34;right_value&#34;),
+            right_indices=constraint.get(&#34;right_indices&#34;),
+            asset_indices=asset_indices,
+        )
+        # Process the operator
+        cp_constraint: cp.Constraint = _process_operator(
+            operator=constraint[&#34;operator&#34;],
+            left_expr=left_expr,
+            right_expr=right_expr,
+        )
+        constraints.append(cp_constraint)
+
+    return constraints</code></pre>
+</details>
+<div class="desc"><p>Generate constraints for the portfolio optimization problem.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>portfolio_weights</code></strong> :&ensp;<code>cp.Variable</code></dt>
+<dd>The variable representing the portfolio weights.</dd>
+<dt><strong><code>asset_names</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>List of asset names in the portfolio.</dd>
+<dt><strong><code>asset_constraints</code></strong> :&ensp;<code>list[dict[str, Any]]</code></dt>
+<dd>List of asset constraints to apply to the portfolio weights.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[cp.Constraint]</code></dt>
+<dd>List of cvxpy constraints generated from the asset constraints.</dd>
+</dl></div>
+</dd>
+<dt id="penfolioop.constraints.generate_scipy_constraints"><code class="name flex">
+<span>def <span class="ident">generate_scipy_constraints</span></span>(<span>asset_constraints: list[dict[str, Any]], asset_names: list[str]) ‑> list[dict[str, typing.Any]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_scipy_constraints(
+    asset_constraints: list[dict[str, Any]],
+    asset_names: list[str],
+) -&gt; list[dict[str, Any]]:
+    &#34;&#34;&#34;Generate constraints for scipy optimization.
+
+    Parameters
+    ----------
+    asset_constraints : list[dict[str, Any]]
+        List of asset constraints to apply to the portfolio weights.
+    asset_names : list[str]
+        List of asset names in the portfolio.
+
+    Returns
+    -------
+    list[dict[str, Any]]
+        List of constraints formatted for scipy optimization.
+
+    &#34;&#34;&#34;
+    _check_constraints(constraints=asset_constraints)
+    asset_indices: dict[str, int] = {name: i for i, name in enumerate(asset_names)}
+    scipy_constraints = []
+
+    for constraint in asset_constraints:
+        def constraint_fun(x, constraint=constraint):  # noqa: ANN001, ANN202
+            # Calculate left side
+            left_value = sum(x[asset_indices[idx]] for idx in constraint[&#34;left_indices&#34;])
+
+            # Calculate right side
+            if constraint.get(&#34;right_value&#34;) is not None:
+                right_value = constraint[&#34;right_value&#34;]
+            else:
+                right_value = sum(x[asset_indices[idx]] for idx in constraint[&#34;right_indices&#34;])
+
+            # Return constraint value based on operator
+            if constraint[&#34;operator&#34;] in {&#34;&lt;=&#34;, &#34;&lt;&#34;}:
+                return right_value - left_value
+            if constraint[&#34;operator&#34;] in {&#34;&gt;=&#34;, &#34;&gt;&#34;}:
+                return left_value - right_value
+            if constraint[&#34;operator&#34;] == &#34;==&#34;:
+                return left_value - right_value
+            msg = f&#34;Unsupported operator: {constraint[&#39;operator&#39;]}&#34;
+            raise ValueError(msg)
+
+        constraint_type = &#34;ineq&#34; if constraint[&#34;operator&#34;] in {&#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&gt;&#34;, &#34;&lt;&#34;} else &#34;eq&#34;
+        scipy_constraints.append({
+            &#34;type&#34;: constraint_type,
+            &#34;fun&#34;: constraint_fun,
+        })
+
+    return scipy_constraints</code></pre>
+</details>
+<div class="desc"><p>Generate constraints for scipy optimization.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>asset_constraints</code></strong> :&ensp;<code>list[dict[str, Any]]</code></dt>
+<dd>List of asset constraints to apply to the portfolio weights.</dd>
+<dt><strong><code>asset_names</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>List of asset names in the portfolio.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, Any]]</code></dt>
+<dd>List of constraints formatted for scipy optimization.</dd>
+</dl></div>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="penfolioop.constraints.AssetConstraint"><code class="flex name class">
+<span>class <span class="ident">AssetConstraint</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AssetConstraint(BaseModel):
+    &#34;&#34;&#34;Model for validating individual asset constraints.&#34;&#34;&#34;
+
+    left_indices: list[str]
+    operator: Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;]
+    right_value: float | None = None
+    right_indices: list[str] | None = None
+
+    # Validator for left_indices
+    @field_validator(&#34;left_indices&#34;)
+    @classmethod
+    def validate_left_indices(cls, v: list[str]) -&gt; list[str]:
+        &#34;&#34;&#34;Ensure left_indices is not empty.
+
+        Parameters
+        ----------
+        v : list[str]
+            List of asset names for the left-hand side of the constraint.
+
+        Returns
+        -------
+        list[str]
+            Validated list of asset names.
+
+        Raises
+        ------
+        ValueError
+            If left_indices is empty or contains duplicate names.
+
+        &#34;&#34;&#34;
+        if not v:
+            msg = &#34;left_indices must not be empty&#34;
+            raise ValueError(msg)
+        if len(v) != len(set(v)):
+            msg = &#34;Asset names in left_indices must be unique&#34;
+            raise ValueError(msg)
+        return v
+
+    # Validator for the operator
+    @field_validator(&#34;operator&#34;)
+    @classmethod
+    def validate_operator(cls, v: Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;]) -&gt; Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;]:
+        &#34;&#34;&#34;Ensure operator is one of the allowed values.
+
+        Parameters
+        ----------
+        v : Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;]
+            The operator to validate.
+
+        Returns
+        -------
+        Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;]
+            Validated operator.
+
+        Raises
+        ------
+        ValueError
+            If the operator is not one of the allowed values.
+
+        &#34;&#34;&#34;
+        allowed_operators = {&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;}
+        if v not in allowed_operators:
+            msg = f&#34;Operator must be one of {allowed_operators}, got {v}&#34;
+            raise ValueError(msg)
+        return v
+
+    # Validator for the right_indices in the right side of the constraint
+    @field_validator(&#34;right_indices&#34;)
+    @classmethod
+    def validate_right_indices(cls, v: list[str] | None) -&gt; list[str] | None:
+        &#34;&#34;&#34;Ensure right_indices is not empty and contains unique names.
+
+        Parameters
+        ----------
+        v : list[str] | None
+            List of asset names for the right-hand side of the constraint.
+
+        Returns
+        -------
+        list[str] | None
+            Validated list of asset names or None if not provided.
+
+        Raises
+        ------
+        ValueError
+            If right_indices is not None and is empty or contains duplicate names.
+
+
+        &#34;&#34;&#34;
+        if v is not None and not v:
+            msg = &#34;right_indices must not be empty if provided&#34;
+            raise ValueError(msg)
+        if v is not None and len(v) != len(set(v)):
+            msg = &#34;Asset names in right_indices must be unique&#34;
+            raise ValueError(msg)
+        return v
+
+    # Validator for the right_value in the right side of the constraint
+    @field_validator(&#34;right_value&#34;)
+    @classmethod
+    def validate_right_value(cls, v: float | None) -&gt; float | None:
+        &#34;&#34;&#34;Ensure right_value is a non-negative number if provided.
+
+        Parameters
+        ----------
+        v : float | None
+            The right-hand side value of the constraint.
+
+        Returns
+        -------
+        float | None
+            Validated right value or None if not provided.
+
+        Raises
+        ------
+        ValueError
+            If right_value is not None and is not a number or is negative.
+
+        &#34;&#34;&#34;
+        if v is not None and not isinstance(v, (int, float)):
+            msg = &#34;right_value must be a number if provided&#34;
+            raise ValueError(msg)
+        if v is not None and (v &lt; 0 or v &gt; 1):
+            msg = &#34;right_value must be between 0 and 1 if provided&#34;
+            raise ValueError(msg)
+        return float(v) if v is not None else None
+
+    # Validator to ensure either right_value or right_indices is provided, but not both
+    @model_validator(mode=&#34;after&#34;)
+    def validate_right_side(self) -&gt; Self:
+        &#34;&#34;&#34;Ensure that either right_value or right_indices is provided, but not both.
+
+        Returns
+        -------
+        Self
+            The validated AssetConstraint instance.
+
+        Raises
+        ------
+        ValueError
+            If neither right_value nor right_indices is provided, or if both are provided.
+
+        &#34;&#34;&#34;
+        right_value = self.right_value
+        right_indices = self.right_indices
+        if right_value is None and right_indices is None:
+            msg = &#34;Either right_value or right_indices must be provided&#34;
+            raise ValueError(msg)
+        if right_value is not None and right_indices is not None:
+            msg = &#34;Only one of right_value or right_indices can be provided&#34;
+            raise ValueError(msg)
+        return self</code></pre>
+</details>
+<div class="desc"><p>Model for validating individual asset constraints.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="penfolioop.constraints.AssetConstraint.left_indices"><code class="name">var <span class="ident">left_indices</span> : list[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="penfolioop.constraints.AssetConstraint.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="penfolioop.constraints.AssetConstraint.operator"><code class="name">var <span class="ident">operator</span> : Literal['==', '<=', '>=', '<', '>']</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="penfolioop.constraints.AssetConstraint.right_indices"><code class="name">var <span class="ident">right_indices</span> : list[str] | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="penfolioop.constraints.AssetConstraint.right_value"><code class="name">var <span class="ident">right_value</span> : float | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="penfolioop.constraints.AssetConstraint.validate_left_indices"><code class="name flex">
+<span>def <span class="ident">validate_left_indices</span></span>(<span>v: list[str]) ‑> list[str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Ensure left_indices is not empty.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>v</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>List of asset names for the left-hand side of the constraint.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[str]</code></dt>
+<dd>Validated list of asset names.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If left_indices is empty or contains duplicate names.</dd>
+</dl></div>
+</dd>
+<dt id="penfolioop.constraints.AssetConstraint.validate_operator"><code class="name flex">
+<span>def <span class="ident">validate_operator</span></span>(<span>v: "Literal['==', '<=', '>=', '<', '>']") ‑> Literal['==', '<=', '>=', '<', '>']</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Ensure operator is one of the allowed values.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>v</code></strong> :&ensp;<code>Literal["==", "&lt;=", "&gt;=", "&lt;", "&gt;"]</code></dt>
+<dd>The operator to validate.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Literal["==", "&lt;=", "&gt;=", "&lt;", "&gt;"]</code></dt>
+<dd>Validated operator.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If the operator is not one of the allowed values.</dd>
+</dl></div>
+</dd>
+<dt id="penfolioop.constraints.AssetConstraint.validate_right_indices"><code class="name flex">
+<span>def <span class="ident">validate_right_indices</span></span>(<span>v: list[str] | None) ‑> list[str] | None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Ensure right_indices is not empty and contains unique names.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>v</code></strong> :&ensp;<code>list[str] | None</code></dt>
+<dd>List of asset names for the right-hand side of the constraint.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[str] | None</code></dt>
+<dd>Validated list of asset names or None if not provided.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If right_indices is not None and is empty or contains duplicate names.</dd>
+</dl></div>
+</dd>
+<dt id="penfolioop.constraints.AssetConstraint.validate_right_value"><code class="name flex">
+<span>def <span class="ident">validate_right_value</span></span>(<span>v: float | None) ‑> float | None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Ensure right_value is a non-negative number if provided.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>v</code></strong> :&ensp;<code>float | None</code></dt>
+<dd>The right-hand side value of the constraint.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float | None</code></dt>
+<dd>Validated right value or None if not provided.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If right_value is not None and is not a number or is negative.</dd>
+</dl></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="penfolioop.constraints.AssetConstraint.validate_right_side"><code class="name flex">
+<span>def <span class="ident">validate_right_side</span></span>(<span>self) ‑> Self</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@model_validator(mode=&#34;after&#34;)
+def validate_right_side(self) -&gt; Self:
+    &#34;&#34;&#34;Ensure that either right_value or right_indices is provided, but not both.
+
+    Returns
+    -------
+    Self
+        The validated AssetConstraint instance.
+
+    Raises
+    ------
+    ValueError
+        If neither right_value nor right_indices is provided, or if both are provided.
+
+    &#34;&#34;&#34;
+    right_value = self.right_value
+    right_indices = self.right_indices
+    if right_value is None and right_indices is None:
+        msg = &#34;Either right_value or right_indices must be provided&#34;
+        raise ValueError(msg)
+    if right_value is not None and right_indices is not None:
+        msg = &#34;Only one of right_value or right_indices can be provided&#34;
+        raise ValueError(msg)
+    return self</code></pre>
+</details>
+<div class="desc"><p>Ensure that either right_value or right_indices is provided, but not both.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Self</code></dt>
+<dd>The validated AssetConstraint instance.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If neither right_value nor right_indices is provided, or if both are provided.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="penfolioop" href="index.html">penfolioop</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="penfolioop.constraints.generate_constraints" href="#penfolioop.constraints.generate_constraints">generate_constraints</a></code></li>
+<li><code><a title="penfolioop.constraints.generate_scipy_constraints" href="#penfolioop.constraints.generate_scipy_constraints">generate_scipy_constraints</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="penfolioop.constraints.AssetConstraint" href="#penfolioop.constraints.AssetConstraint">AssetConstraint</a></code></h4>
+<ul class="">
+<li><code><a title="penfolioop.constraints.AssetConstraint.left_indices" href="#penfolioop.constraints.AssetConstraint.left_indices">left_indices</a></code></li>
+<li><code><a title="penfolioop.constraints.AssetConstraint.model_config" href="#penfolioop.constraints.AssetConstraint.model_config">model_config</a></code></li>
+<li><code><a title="penfolioop.constraints.AssetConstraint.operator" href="#penfolioop.constraints.AssetConstraint.operator">operator</a></code></li>
+<li><code><a title="penfolioop.constraints.AssetConstraint.right_indices" href="#penfolioop.constraints.AssetConstraint.right_indices">right_indices</a></code></li>
+<li><code><a title="penfolioop.constraints.AssetConstraint.right_value" href="#penfolioop.constraints.AssetConstraint.right_value">right_value</a></code></li>
+<li><code><a title="penfolioop.constraints.AssetConstraint.validate_left_indices" href="#penfolioop.constraints.AssetConstraint.validate_left_indices">validate_left_indices</a></code></li>
+<li><code><a title="penfolioop.constraints.AssetConstraint.validate_operator" href="#penfolioop.constraints.AssetConstraint.validate_operator">validate_operator</a></code></li>
+<li><code><a title="penfolioop.constraints.AssetConstraint.validate_right_indices" href="#penfolioop.constraints.AssetConstraint.validate_right_indices">validate_right_indices</a></code></li>
+<li><code><a title="penfolioop.constraints.AssetConstraint.validate_right_side" href="#penfolioop.constraints.AssetConstraint.validate_right_side">validate_right_side</a></code></li>
+<li><code><a title="penfolioop.constraints.AssetConstraint.validate_right_value" href="#penfolioop.constraints.AssetConstraint.validate_right_value">validate_right_value</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>
