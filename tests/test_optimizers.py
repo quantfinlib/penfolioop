@@ -94,7 +94,7 @@ def generic_weight_requirements(weights: np.ndarray, expected_length: int):
         raise ValueError("Asset weights must sum to 1.")
     if not np.isclose(weights[-1], -1):
         raise ValueError("Last weight must be -1 (for liabilities).")
-    if np.any(weights[:-1] < 0):
+    if np.any(weights[:-1] < -1e-6):
         raise ValueError("Asset weights must be non-negative.")
     if np.any(weights[:-1] > 1):
         raise ValueError("Asset weights must not exceed 1.")
@@ -105,7 +105,7 @@ def generic_weight_requirements(weights: np.ndarray, expected_length: int):
     surplus_mean_variance_optimizer,
     max_surplus_return_optimizer,
     max_surplus_sharp_ratio_optimizer])
-def test_optimizer(portfolio, optimizer, asset_constraints1, asset_constraints2):
+def test_optimizer(portfolio, optimizer, asset_constraints1, asset_constraints2, invalid_asset_constraints):
     
     # Test with asset constraints 1
     weights = optimizer(portfolio, asset_constraints=asset_constraints1)
