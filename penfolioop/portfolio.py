@@ -13,8 +13,34 @@ from pydantic import BaseModel, model_validator
 
 
 class Portfolio(BaseModel):
-    """Base model for Portfolio, used for validation.
-    
+    r"""Portfolio class.
+
+    This class can be used to instantiate a portfolio object with information about its assets and liabilities.
+    Let's assume that we have a portfolio of $n$. The following parameters are required to define the portfolio:
+
+    - `names`: A list with length of $n + 1$ consisting of asset names in the portfolio and the liability.
+    Example: `["Asset 1", "Asset 2", ... , "Asset n", "Liability"]`
+
+    - `expected_returns`: An array of length $n + 1$ consisting of expected returns for the assets.
+
+    $$
+    \mathbf{R} = \begin{bmatrix} r_1 \\ r_2 \\ \vdots \\ r_n \\ r_L \end{bmatrix},
+    $$
+
+    where $r_1, r_2, \ldots, r_n$ are the expected returns of the assets and $r_L$ is the 
+    expected return of the liabilities.
+    Example: `np.array([0.1, 0.2, ... , 0.1, 0.05])`, where the last element is the expected return of the liabilities.
+
+    - `covariance_matrix`: The total covariance matrix of the asset and liability returns.
+    $$
+    \mathbf{\Sigma} = \begin{bmatrix} \Sigma & \Sigma_{AL} \\ \Sigma_{AL} & \sigma_L^2 \end{bmatrix},
+    $$
+    where $\Sigma$ is the $n$ by $n$ covariance matrix of the asset returns, $\Sigma_{AL}$ is an $n$-dimensional vector
+    representing the covariance between the assets and liabilities, and $\sigma_L^2$ is the variance of the liabilities.
+
+    Example: `np.array([[0.1, 0.02, ...], [0.02, 0.1, ...], [...], [0.01, 0.005, ...]])`,
+    where the last row and column correspond to the liabilities.
+
     Attributes
     ----------
     names : list[str]
@@ -33,16 +59,22 @@ class Portfolio(BaseModel):
     -------
     validate_covariance_matrix() -> Self
         Validates the covariance matrix for shape, symmetry, and positive semi-definiteness.
+
     validate_expected_returns() -> Self
         Validates the expected returns array for shape consistency with the number of assets.
+
     validate_weights(weights: np.ndarray) -> None
         Validates the weights of the assets in the portfolio.
+
     surplus_return(weights: np.ndarray) -> float
         Calculates the surplus return of the portfolio given the asset weights.
+
     surplus_variance(weights: np.ndarray) -> float
         Calculates the surplus variance of the portfolio given the asset weights.
+
     portfolio_return(weights: np.ndarray) -> float
         Calculates the return of the portfolio given the asset weights.
+
     portfolio_variance(weights: np.ndarray) -> float
         Calculates the variance of the portfolio given the weights.
 
@@ -62,8 +94,6 @@ class Portfolio(BaseModel):
         "arbitrary_types_allowed": True,
     }
 
-
-
     @property
     def n_assets(self) -> int:
         """Get the number of assets in the portfolio.
@@ -74,7 +104,7 @@ class Portfolio(BaseModel):
             The number of assets in the portfolio.
 
         """
-        return len(self.names)
+        return len(self.names) - 1
 
     @model_validator(mode="after")
     def validate_covariance_matrix(self) -> Self:
@@ -88,13 +118,14 @@ class Portfolio(BaseModel):
         Raises
         ------
         ValueError
-            If the covariance matrix is not square, not symmetric, or not positive semi-definite.
+            If the covariance matrix is not square, not symmetric, not positive semi-definite, or when
+            it does not have the right dimensions.
 
         """
-        if self.covariance_matrix.shape != (self.n_assets, self.n_assets):
-            msg = "Covariance matrix must be square with dimensions equal to the number of assets."
+        if self.covariance_matrix.shape != (self.n_assets + 1, self.n_assets + 1):
+            msg = "Covariance matrix must be square with dimensions equal to the number of assets + 1."
             raise ValueError(msg)
-        if self.covariance_matrix.ndim != 2:
+        if self.covariance_matrix.ndim != 2:  # noqa: PLR2004
             msg = "Covariance matrix must be a 2D array."
             raise ValueError(msg)
         if not np.allclose(self.covariance_matrix, self.covariance_matrix.T):
@@ -120,8 +151,8 @@ class Portfolio(BaseModel):
             If the expected returns array does not match the number of assets.
 
         """
-        if self.expected_returns.shape != (self.n_assets,):
-            msg = "Expected returns must be a 1D array with length equal to the number of assets."
+        if self.expected_returns.shape != (self.n_assets + 1,):
+            msg = "Expected returns must be a 1D array with length equal to the number of assets + 1."
             raise ValueError(msg)
         return self
 
@@ -151,7 +182,16 @@ class Portfolio(BaseModel):
             raise ValueError(msg)
 
     def surplus_return(self, weights: np.ndarray) -> float:
-        """Calculate the surplus return of the portfolio given the asset weights.
+        r"""Calculate the surplus return of the portfolio given the asset weights.
+
+        The surplus return is defined as the return of the portfolio - the expected return of the liabilities.
+        $$
+        R_s = R_p - R_L = \sum_{i=1}^{n} w_i R_i - R_L = \mathbf{W}^{T} \mathbf{R},
+        $$
+        where $R_i$ is the expected return of asset $i$, $R_L$ is the expected return of the liabilities,
+        $R = \begin{bmatrix} R_1 \\ R_2 \\ \vdots \\ R_n \\ R_L \end{bmatrix}$ is `self.expected_returns`
+        containing the expected returns of the assets and liabilities,
+        and $\mathbf{W} = \begin{bmatrix} w_1 \\ w_2 \\ \vdots \\ w_n \\ -1 \end{bmatrix}$ is the vector of weights.
 
         Parameters
         ----------
