@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.6">
 <title>penfolioop.optimizers API documentation</title>
-<meta name="description" content="Portfolio optimization algorithms and utilities …">
+<meta name="description" content="Portfolio optimization and objective functions …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -38,13 +38,126 @@ el.replaceWith(d);
 <h1 class="title">Module <code>penfolioop.optimizers</code></h1>
 </header>
 <section id="section-intro">
-<p>Portfolio optimization algorithms and utilities.</p>
-<p>This module provides various optimization functions for pension fund portfolio optimization, including:
-- max_surplus_sharp_ratio_optimizer: Maximizes the surplus portfolio return to surplus portfolio risk
-- surplus_mean_variance_optimizer: Mean-variance optimization for surplus portfolios
-- max_surplus_return_optimizer: Maximizes surplus return
-- min_surplus_variance_optimizer: Minimizes surplus variance
-- efficient_frontier: Find the efficient frontier</p>
+<p>Portfolio optimization and objective functions.</p>
+<p>This module provides various objective functions for pension fund portfolio optimization, including:</p>
+<ul>
+<li><code><a title="penfolioop.optimizers.max_surplus_sharp_ratio_optimizer" href="#penfolioop.optimizers.max_surplus_sharp_ratio_optimizer">max_surplus_sharp_ratio_optimizer()</a></code>: </li>
+</ul>
+<p>This function Maximizes the surplus portfolio return to surplus portfolio risk.</p>
+<ul>
+<li><code><a title="penfolioop.optimizers.surplus_mean_variance_optimizer" href="#penfolioop.optimizers.surplus_mean_variance_optimizer">surplus_mean_variance_optimizer()</a></code>: </li>
+</ul>
+<p>Mean-variance optimization for surplus portfolios.</p>
+<ul>
+<li><code><a title="penfolioop.optimizers.max_surplus_return_optimizer" href="#penfolioop.optimizers.max_surplus_return_optimizer">max_surplus_return_optimizer()</a></code>: </li>
+</ul>
+<p>Maximizes surplus return with the option of an upper limit on the surplus variance.</p>
+<ul>
+<li><code><a title="penfolioop.optimizers.min_surplus_variance_optimizer" href="#penfolioop.optimizers.min_surplus_variance_optimizer">min_surplus_variance_optimizer()</a></code>: </li>
+</ul>
+<p>Minimizes surplus variance with the option of a lower limit on the surplus return.</p>
+<ul>
+<li><code><a title="penfolioop.optimizers.efficient_frontier" href="#penfolioop.optimizers.efficient_frontier">efficient_frontier()</a></code>: </li>
+</ul>
+<p>Finds the efficient frontier portfolios.</p>
+<p>In all these problems, we aim to find the weight vector that optimally allocates assets in the portfolio.
+The weight vector is always an array of asset weights plus a liability weight (the last element of the weight vector),
+where the liability weight is always set to -1. </p>
+<p>Let's assume that we have $n_{assets}$ in our portfolio. Therefore, the weight vector
+is a $n_{assets} + 1$ dimensional vector, where the first $n_{assets}$ elements are the asset weights
+and the last element is the liability weight.</p>
+<p><span><span class="MathJax_Preview">
+\mathbf{w} = \begin{bmatrix}
+w_1 \\
+w_2 \\
+\vdots \\
+w_{n_{assets}} \\
+w_L
+\end{bmatrix} = \begin{bmatrix}
+w_1 \\
+w_2 \\
+\vdots \\
+w_{n_{assets}} \\
+-1
+\end{bmatrix}
+</span><script type="math/tex; mode=display">
+\mathbf{w} = \begin{bmatrix}
+w_1 \\
+w_2 \\
+\vdots \\
+w_{n_{assets}} \\
+w_L
+\end{bmatrix} = \begin{bmatrix}
+w_1 \\
+w_2 \\
+\vdots \\
+w_{n_{assets}} \\
+-1
+\end{bmatrix}
+</script></span>, </p>
+<p>where <span><span class="MathJax_Preview"> w_i </span><script type="math/tex"> w_i </script></span> is the weight of asset <span><span class="MathJax_Preview"> i </span><script type="math/tex"> i </script></span> and <span><span class="MathJax_Preview"> w_L </span><script type="math/tex"> w_L </script></span> is the weight of the liabilities, which is set to -1.</p>
+<p>In a similar fashion, we define the expected return vector as an array containing the
+expected returns of the assets and liabilities. This is a <span><span class="MathJax_Preview">n_{assets} + 1</span><script type="math/tex">n_{assets} + 1</script></span> dimensional vector,
+where the first <span><span class="MathJax_Preview">n_{assets}</span><script type="math/tex">n_{assets}</script></span> elements are the expected returns of the assets and the
+last element is the expected return of the liabilities.</p>
+<p><span><span class="MathJax_Preview">
+\mathbf{R} = \begin{bmatrix}
+r_1 \\
+r_2 \\
+\vdots \\
+r_n \\
+r_L
+\end{bmatrix},
+</span><script type="math/tex; mode=display">
+\mathbf{R} = \begin{bmatrix}
+r_1 \\
+r_2 \\
+\vdots \\
+r_n \\
+r_L
+\end{bmatrix},
+</script></span></p>
+<p>where <span><span class="MathJax_Preview"> r_i </span><script type="math/tex"> r_i </script></span> is the expected return of asset <span><span class="MathJax_Preview"> i </span><script type="math/tex"> i </script></span> and <span><span class="MathJax_Preview"> r_L </span><script type="math/tex"> r_L </script></span> is the expected return of the liabilities.</p>
+<p>The covariance matrix is defined as the covariance matrix of assets and liability returns.
+This matrix is a <span><span class="MathJax_Preview">n_{assets} + 1</span><script type="math/tex">n_{assets} + 1</script></span> by <span><span class="MathJax_Preview">n_{assets} + 1</span><script type="math/tex">n_{assets} + 1</script></span> square matrix, where the first <span><span class="MathJax_Preview">n_{assets}</span><script type="math/tex">n_{assets}</script></span>
+rows and columns correspond to the assets and the last row and column correspond to the liabilities.</p>
+<p><span><span class="MathJax_Preview">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} , \Sigma_{AL} \\
+\Sigma_{AL} , \sigma^{2}_{L}
+\end{bmatrix},
+</span><script type="math/tex; mode=display">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} , \Sigma_{AL} \\
+\Sigma_{AL} , \sigma^{2}_{L}
+\end{bmatrix},
+</script></span></p>
+<p>where <span><span class="MathJax_Preview"> \Sigma_{A} </span><script type="math/tex"> \Sigma_{A} </script></span> is a covariance matrix of the assets,
+<span><span class="MathJax_Preview"> \Sigma_{AL} </span><script type="math/tex"> \Sigma_{AL} </script></span> is the covariance between the assets and liabilities,
+and <span><span class="MathJax_Preview"> \sigma^{2}_{L} </span><script type="math/tex"> \sigma^{2}_{L} </script></span> is the variance of the liabilities.
+<span><span class="MathJax_Preview"> \Sigma_{A} </span><script type="math/tex"> \Sigma_{A} </script></span> is a <span><span class="MathJax_Preview">n_{assets}</span><script type="math/tex">n_{assets}</script></span> by <span><span class="MathJax_Preview">n_{assets}</span><script type="math/tex">n_{assets}</script></span> square matrix, where each element
+represents the covariance between the returns of two assets.
+<span><span class="MathJax_Preview"> \Sigma_{AL} </span><script type="math/tex"> \Sigma_{AL} </script></span> is a <span><span class="MathJax_Preview">n_{assets}</span><script type="math/tex">n_{assets}</script></span> dimensional vector, where each element represents the
+covariance between the returns of an asset and liability return.
+<span><span class="MathJax_Preview"> \sigma^{2}_{L} </span><script type="math/tex"> \sigma^{2}_{L} </script></span> is the variance of the liability return.</p>
+<p>With these conventions at hand, we can compute the surplus return (return of the portfolio in excess of liabilities)
+and the surplus variance (variance of the surplus returns) in the following way.</p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+\text{Surplus Return} &amp;= \mathbf{W}^{T} \mathbf{R}
+= \sum_{i=1}^{n_{assets}} w_{i} r_{i} - r_{L} \\
+\text{Surplus Variance} &amp;= \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W}
+= \sum_{i=1}^{n_{assets}} \sum_{j=1}^{n_{assets}} w_{i} w_{j} \big(\Sigma_{A}\big)_{ij} - 2 \sum_{i=1}^{n_{assets}} w_{i} \big(\Sigma_{AL}\big)_{i} + \sigma^{2}_{L}
+\end{align*}
+</span><script type="math/tex; mode=display">
+\begin{align*}
+\text{Surplus Return} &= \mathbf{W}^{T} \mathbf{R}
+= \sum_{i=1}^{n_{assets}} w_{i} r_{i} - r_{L} \\
+\text{Surplus Variance} &= \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W}
+= \sum_{i=1}^{n_{assets}} \sum_{j=1}^{n_{assets}} w_{i} w_{j} \big(\Sigma_{A}\big)_{ij} - 2 \sum_{i=1}^{n_{assets}} w_{i} \big(\Sigma_{AL}\big)_{i} + \sigma^{2}_{L}
+\end{align*}
+</script></span></p>
+<p>For the sake of clarity on the conventions used in this module, we repeat some of these definitions in the documentation of individual functions.</p>
 </section>
 <section>
 </section>
@@ -54,7 +167,7 @@ el.replaceWith(d);
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="penfolioop.optimizers.efficient_frontier"><code class="name flex">
-<span>def <span class="ident">efficient_frontier</span></span>(<span>portfolio: Portfolio,<br>num_points: int = 100,<br>asset_constraints: list[dict[str, Any]] | None = None,<br>lmbd_range: tuple[float, float] = (0, 1)) ‑> tuple[np.ndarray, np.ndarray, np.ndarray]</span>
+<span>def <span class="ident">efficient_frontier</span></span>(<span>portfolio: Portfolio,<br>asset_constraints: list[dict[str, Any]] | None = None,<br>surplus_return_range: tuple[float, float] = (0, 1)) ‑> dict[str, np.ndarray]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -63,80 +176,172 @@ el.replaceWith(d);
 </summary>
 <pre><code class="python">def efficient_frontier(
     portfolio: Portfolio,
-    num_points: int = 100,
     asset_constraints: list[dict[str, Any]] | None = None,
-    lmbd_range: tuple[float, float] = (0, 1),
-) -&gt; tuple[np.ndarray, np.ndarray, np.ndarray]:
-    &#34;&#34;&#34;Find the efficient frontier of the portfolio.
+    surplus_return_range: tuple[float, float] = (0, 1),
+) -&gt; dict[str, np.ndarray]:
+    r&#34;&#34;&#34;Find the efficient frontier of the portfolio.
+
+    This function calculates the weights of the following optimization problem by
+    varying the surplus return lower limit $\tilde{R}$.
+
+    $$
+    \underset{\mathbf{W}}{\text{minimize}} \quad \mathbf{W}^{T} \mathbf{C} \mathbf{W}
+    $$
+    subject to
+
+    $$
+    \mathbf{W}^{T} \mathbf{R} \geq \tilde{R}.
+    $$
+
+    By varying the surplus return lower limit, we get a different set of weights (different portfolios).
+    The set of all these optimal portfolios forms the efficient frontier.
+
+    Note that
+
+    $$
+    \begin{align*}
+    \mathbf{W} &amp;=&amp; \big[  w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+    \mathbf{R} &amp;=&amp; \big[  R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+    \end{align*} \\
+    $$
+
+    $$
+    \mathbf{\Sigma} = \begin{bmatrix}
+    \Sigma_{A} &amp; \Sigma_{AL} \\
+    \Sigma_{AL} &amp; \sigma^{2}_{L}
+    \end{bmatrix},
+    $$
+
+    where $\mathbf{W}$ is the vector of assets and liability weights, $\mathbf{R}$ is the vector of expected returns
+    for the assets and liabilities, and $\mathbf{\Sigma}$ is the covariance matrix of the assets and liabilities.
+    The last element of $\mathbf{W}$ corresponds to the liabilities. The liability weight is always set to -1.
+
+    As always, the following general constraints apply to the weights:
+
+    $$
+    \begin{align*}
+    (1) &amp;\quad&amp; \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+    (2) &amp;\quad&amp; w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+    (3) &amp;\quad&amp; w_{n_{assets} + 1} = w_{L} = -1
+    \end{align*}
+    $$
+
+    If additional asset constraints are provided, they will be incorporated into the optimization problem.
+    See `penfolioop.constraints` for more details.
 
     Parameters
     ----------
     portfolio : Portfolio
         The portfolio object containing asset names, covariance matrix, expected returns.
-    num_points : int, optional
-        Number of points to calculate on the efficient frontier. Default is 100.
     asset_constraints : list[dict[str, Any]], optional
         Additional constraints for the optimization problem. Default is None.
-    lmbd_range : tuple[float, float], optional
-        Range of lambda values to consider for the optimization. Default is (0, 1).
+    surplus_return_range : tuple[float, float], optional
+        Range of surplus return values to consider for the optimization. Default is (0, 1).
 
     Returns
     -------
-    tuple[np.ndarray, np.ndarray]
-        Tuple containing arrays of surplus returns and surplus variances.
-
+    dict
+        Dictionary containing arrays of weights, surplus returns, and surplus variances.
     &#34;&#34;&#34;
-    if lmbd_range is None:
-        lmbd_range = (0, 1)
-    else:
-        _validate_lmbd_range(lmbd_range)
-    lmbds = np.linspace(lmbd_range[0], lmbd_range[1], num_points)
-    surplus_returns = []
-    surplus_variances = []
+    target_returns = np.linspace(surplus_return_range[0], surplus_return_range[1], 100)
     weights_placeholder = []
+    surplus_return_place_holder = []
+    surplus_variance_place_holder = []
+    for target_return in target_returns:
+        weights = min_surplus_variance_optimizer(
+            portfolio=portfolio,
+            asset_constraints=asset_constraints,
+            surplus_return_lower_limit=target_return
+        )
+        weights_placeholder.append(weights)
+        surplus_return_place_holder.append(portfolio.surplus_return(weights))
+        surplus_variance_place_holder.append(portfolio.surplus_variance(weights))
 
-    def _optimize_single_lambda(lmbd) -&gt; np.ndarray | None:  # noqa: ANN001
-        &#34;&#34;&#34;Optimize for a single lambda value.&#34;&#34;&#34;  # noqa: DOC201
-        try:
-            return surplus_mean_variance_optimizer(
-                portfolio=portfolio, lmbd=lmbd, asset_constraints=asset_constraints
-            )
-        except ValueError:
-            return None
-
-    for lmbd in lmbds:
-        weights = _optimize_single_lambda(lmbd)
-        if weights is not None:
-            weights_placeholder.append(weights)
-            surplus_returns.append(portfolio.surplus_return(weights))
-            surplus_variances.append(portfolio.surplus_variance(weights))
-        else:
-            # If optimization fails for a particular lambda, append NaN
-            weights_placeholder.append(np.nan * np.ones(len(portfolio.names)))
-            surplus_returns.append(np.nan)
-            surplus_variances.append(np.nan)
-    return np.array(weights_placeholder), np.array(surplus_returns), np.array(surplus_variances)</code></pre>
+    return {
+        &#34;weights&#34;: np.array(weights_placeholder),
+        &#34;surplus_returns&#34;: np.array(surplus_return_place_holder),
+        &#34;surplus_variances&#34;: np.array(surplus_variance_place_holder)
+    }</code></pre>
 </details>
 <div class="desc"><p>Find the efficient frontier of the portfolio.</p>
+<p>This function calculates the weights of the following optimization problem by
+varying the surplus return lower limit $\tilde{R}$.</p>
+<p><span><span class="MathJax_Preview">
+\underset{\mathbf{W}}{\text{minimize}} \quad \mathbf{W}^{T} \mathbf{C} \mathbf{W}
+</span><script type="math/tex; mode=display">
+\underset{\mathbf{W}}{\text{minimize}} \quad \mathbf{W}^{T} \mathbf{C} \mathbf{W}
+</script></span>
+subject to</p>
+<p><span><span class="MathJax_Preview">
+\mathbf{W}^{T} \mathbf{R} \geq \tilde{R}.
+</span><script type="math/tex; mode=display">
+\mathbf{W}^{T} \mathbf{R} \geq \tilde{R}.
+</script></span></p>
+<p>By varying the surplus return lower limit, we get a different set of weights (different portfolios).
+The set of all these optimal portfolios forms the efficient frontier.</p>
+<p>Note that</p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+\mathbf{W} &amp;=&amp; \big[
+w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+\mathbf{R} &amp;=&amp; \big[
+R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+\end{align*} \\
+</span><script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{W} &=& \big[
+w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+\mathbf{R} &=& \big[
+R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+\end{align*} \\
+</script></span></p>
+<p><span><span class="MathJax_Preview">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} &amp; \Sigma_{AL} \\
+\Sigma_{AL} &amp; \sigma^{2}_{L}
+\end{bmatrix},
+</span><script type="math/tex; mode=display">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} & \Sigma_{AL} \\
+\Sigma_{AL} & \sigma^{2}_{L}
+\end{bmatrix},
+</script></span></p>
+<p>where $\mathbf{W}$ is the vector of assets and liability weights, $\mathbf{R}$ is the vector of expected returns
+for the assets and liabilities, and $\mathbf{\Sigma}$ is the covariance matrix of the assets and liabilities.
+The last element of $\mathbf{W}$ corresponds to the liabilities. The liability weight is always set to -1.</p>
+<p>As always, the following general constraints apply to the weights:</p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+(1) &amp;\quad&amp; \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+(2) &amp;\quad&amp; w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+(3) &amp;\quad&amp; w_{n_{assets} + 1} = w_{L} = -1
+\end{align*}
+</span><script type="math/tex; mode=display">
+\begin{align*}
+(1) &\quad& \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+(2) &\quad& w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+(3) &\quad& w_{n_{assets} + 1} = w_{L} = -1
+\end{align*}
+</script></span></p>
+<p>If additional asset constraints are provided, they will be incorporated into the optimization problem.
+See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> for more details.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>portfolio</code></strong> :&ensp;<code>Portfolio</code></dt>
 <dd>The portfolio object containing asset names, covariance matrix, expected returns.</dd>
-<dt><strong><code>num_points</code></strong> :&ensp;<code>int</code>, optional</dt>
-<dd>Number of points to calculate on the efficient frontier. Default is 100.</dd>
 <dt><strong><code>asset_constraints</code></strong> :&ensp;<code>list[dict[str, Any]]</code>, optional</dt>
 <dd>Additional constraints for the optimization problem. Default is None.</dd>
-<dt><strong><code>lmbd_range</code></strong> :&ensp;<code>tuple[float, float]</code>, optional</dt>
-<dd>Range of lambda values to consider for the optimization. Default is (0, 1).</dd>
+<dt><strong><code>surplus_return_range</code></strong> :&ensp;<code>tuple[float, float]</code>, optional</dt>
+<dd>Range of surplus return values to consider for the optimization. Default is (0, 1).</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>tuple[np.ndarray, np.ndarray]</code></dt>
-<dd>Tuple containing arrays of surplus returns and surplus variances.</dd>
+<dt><code>dict</code></dt>
+<dd>Dictionary containing arrays of weights, surplus returns, and surplus variances.</dd>
 </dl></div>
 </dd>
 <dt id="penfolioop.optimizers.max_surplus_return_optimizer"><code class="name flex">
-<span>def <span class="ident">max_surplus_return_optimizer</span></span>(<span>portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None) ‑> np.ndarray</span>
+<span>def <span class="ident">max_surplus_return_optimizer</span></span>(<span>portfolio: Portfolio,<br>asset_constraints: list[dict[str, Any]] | None = None,<br>surplus_risk_upper_limit: float | None = None) ‑> np.ndarray</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -144,9 +349,60 @@ el.replaceWith(d);
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def max_surplus_return_optimizer(
-    portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None,
+    portfolio: Portfolio,
+    asset_constraints: list[dict[str, Any]] | None = None,
+    surplus_risk_upper_limit: float | None = None,
 ) -&gt; np.ndarray:
-    &#34;&#34;&#34;Optimize the asset weights to maximize the surplus return over the expected liabilities return.
+    r&#34;&#34;&#34;Optimize the asset weights to maximize the surplus return over the expected liabilities return.
+
+    The optimization problem can be formulated as:
+    $$
+    \underset{\mathbf{W}}{\mathrm{maximize}} \quad \mathbf{W}^{T}\mathbf{R},
+    $$
+
+    $$
+    \begin{align*}
+    \mathbf{W} &amp;=&amp; \big[  w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+    \mathbf{R} &amp;=&amp; \big[  R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+    \end{align*} \\
+    $$
+
+    $$
+    \mathbf{\Sigma} = \begin{bmatrix}
+    \Sigma_{A} &amp; \Sigma_{AL} \\
+    \Sigma_{AL} &amp; \sigma^{2}_{L}
+    \end{bmatrix},
+    $$
+
+    where $\mathbf{W}$ is the vector of assets and liability weights, $\mathbf{R}$ is the vector of expected returns
+    for the assets and liabilities, and $\mathbf{\Sigma}$ is the covariance matrix of the assets and liabilities.
+
+    The last element of $\mathbf{W}$ corresponds to the liabilities. The liability weight is always set to -1.
+
+
+    The optimization is subject to the following constraints:
+
+    $$
+    \begin{align*}
+    (1) &amp;\quad&amp; \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+    (2) &amp;\quad&amp; w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+    (3) &amp;\quad&amp; w_{n_{assets} + 1} = w_{L} = -1
+    \end{align*}
+    $$
+
+    Additionally, if the parameter `surplus_risk_upper_limit` is provided by the user, we will add a surplus risk upper limit
+    constraint to the optimization problem:
+
+    $$
+    \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W} \leq \sigma^2
+    $$, where $\sigma$ is the surplus risk upper limit.
+
+
+    If the `asset_constraints` parameter is provided by the user, the optimization will include these additional
+    constraints. See `penfolioop.constraints` for more details. A valid `asset_constraints` must fulfill a set
+    of properties which are validated by the `penfolioop.constraints.AssetConstraints` class. Users are encouraged
+    to consult with the `penfolioop.constraints` module and in particular the `penfolioop.constraints.AssetConstraints`
+    class for more information on how to properly define asset constraints.
 
     Parameters
     ----------
@@ -154,7 +410,8 @@ el.replaceWith(d);
         The portfolio object containing asset names, covariance matrix, expected returns.
     asset_constraints : list[dict[str, Any]], optional
         Additional constraints for the optimization problem. Default is None.
-
+    surplus_risk_upper_limit : float, optional
+        The surplus risk upper limit for the optimization problem. Default is None.
 
     Returns
     -------
@@ -179,10 +436,14 @@ el.replaceWith(d);
         weights[:n_assets] &gt;= 0,          # No short selling
         weights[-1] == -1,                # Last weight is liabilities
     ]
+    # Apply asset constraints if provided by user
     if asset_constraints:
         constraints += generate_constraints(
             portfolio_weights=weights, asset_constraints=asset_constraints, asset_names=portfolio.names
         )
+    # Surplus risk upper limit constraint if provided by user
+    if surplus_risk_upper_limit is not None:
+        constraints.append(cp.quad_form(weights, portfolio.covariance_matrix) &lt;= surplus_risk_upper_limit ** 2.)
     # Solve the optimization problem
     problem = cp.Problem(objective, constraints)
     problem.solve()
@@ -194,12 +455,75 @@ el.replaceWith(d);
     return weights.value</code></pre>
 </details>
 <div class="desc"><p>Optimize the asset weights to maximize the surplus return over the expected liabilities return.</p>
+<p>The optimization problem can be formulated as:
+<span><span class="MathJax_Preview">
+\underset{\mathbf{W}}{\mathrm{maximize}} \quad \mathbf{W}^{T}\mathbf{R},
+</span><script type="math/tex; mode=display">
+\underset{\mathbf{W}}{\mathrm{maximize}} \quad \mathbf{W}^{T}\mathbf{R},
+</script></span></p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+\mathbf{W} &amp;=&amp; \big[
+w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+\mathbf{R} &amp;=&amp; \big[
+R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+\end{align*} \\
+</span><script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{W} &=& \big[
+w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+\mathbf{R} &=& \big[
+R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+\end{align*} \\
+</script></span></p>
+<p><span><span class="MathJax_Preview">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} &amp; \Sigma_{AL} \\
+\Sigma_{AL} &amp; \sigma^{2}_{L}
+\end{bmatrix},
+</span><script type="math/tex; mode=display">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} & \Sigma_{AL} \\
+\Sigma_{AL} & \sigma^{2}_{L}
+\end{bmatrix},
+</script></span></p>
+<p>where $\mathbf{W}$ is the vector of assets and liability weights, $\mathbf{R}$ is the vector of expected returns
+for the assets and liabilities, and $\mathbf{\Sigma}$ is the covariance matrix of the assets and liabilities.</p>
+<p>The last element of $\mathbf{W}$ corresponds to the liabilities. The liability weight is always set to -1.</p>
+<p>The optimization is subject to the following constraints:</p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+(1) &amp;\quad&amp; \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+(2) &amp;\quad&amp; w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+(3) &amp;\quad&amp; w_{n_{assets} + 1} = w_{L} = -1
+\end{align*}
+</span><script type="math/tex; mode=display">
+\begin{align*}
+(1) &\quad& \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+(2) &\quad& w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+(3) &\quad& w_{n_{assets} + 1} = w_{L} = -1
+\end{align*}
+</script></span></p>
+<p>Additionally, if the parameter <code>surplus_risk_upper_limit</code> is provided by the user, we will add a surplus risk upper limit
+constraint to the optimization problem:</p>
+<p><span><span class="MathJax_Preview">
+\mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W} \leq \sigma^2
+</span><script type="math/tex; mode=display">
+\mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W} \leq \sigma^2
+</script></span>, where $\sigma$ is the surplus risk upper limit.</p>
+<p>If the <code>asset_constraints</code> parameter is provided by the user, the optimization will include these additional
+constraints. See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> for more details. A valid <code>asset_constraints</code> must fulfill a set
+of properties which are validated by the <code>penfolioop.constraints.AssetConstraints</code> class. Users are encouraged
+to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> module and in particular the <code>penfolioop.constraints.AssetConstraints</code>
+class for more information on how to properly define asset constraints.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>portfolio</code></strong> :&ensp;<code>Portfolio</code></dt>
 <dd>The portfolio object containing asset names, covariance matrix, expected returns.</dd>
 <dt><strong><code>asset_constraints</code></strong> :&ensp;<code>list[dict[str, Any]]</code>, optional</dt>
 <dd>Additional constraints for the optimization problem. Default is None.</dd>
+<dt><strong><code>surplus_risk_upper_limit</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The surplus risk upper limit for the optimization problem. Default is None.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -223,7 +547,49 @@ el.replaceWith(d);
 <pre><code class="python">def max_surplus_sharp_ratio_optimizer(
     portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None,
 ) -&gt; np.ndarray:
-    &#34;&#34;&#34;Optimize the asset weights to achieve a target excess return over the expected liabilities return.
+    r&#34;&#34;&#34;Optimize the asset weights to achieve a target excess return over the expected liabilities return.
+
+    This problem can be formulated as:
+
+    $$
+    \underset{\mathbf{W}}{\mathrm{maximize}} \quad  \frac{\mathbf{W}^{T}\mathbf{R}}{\mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W}},
+    $$
+
+
+    $$
+    \begin{align*}
+    \mathbf{W} &amp;=&amp; \big[  w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+    \mathbf{R} &amp;=&amp; \big[  R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+    \end{align*} \\
+    $$
+
+    $$
+    \mathbf{\Sigma} = \begin{bmatrix}
+    \Sigma_{A} &amp; \Sigma_{AL} \\
+    \Sigma_{AL} &amp; \sigma^{2}_{L}
+    \end{bmatrix},
+    $$
+
+    where $\mathbf{W}$ is the vector of assets and liability weights, $\mathbf{R}$ is the vector of expected returns
+    for the assets and liabilities, and $\mathbf{\Sigma}$ is the covariance matrix of the assets and liabilities.
+
+    The last element of $\mathbf{W}$ corresponds to the liabilities. The liability weight is always set to -1.
+
+
+    The optimization is subject to the following constraints:
+
+    $$
+    \begin{align*}
+    (1) &amp;\quad&amp; \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+    (2) &amp;\quad&amp; w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+    (3) &amp;\quad&amp; w_{n_{assets} + 1} = w_{L} = -1
+    \end{align*}
+    $$
+
+    If the `asset_constraints` parameter is provided by the user, the optimization will include these additional constraints.
+    See `penfolioop.constraints` for more details. A valid `asset_constraints` must fullfill a set of properties which are validated
+    by the `penfolioop.constraints.AssetConstraints` class. Users are encouraged to consult with the `penfolioop.constraints`
+    module and in particular the `penfolioop.constraints.AssetConstraints` class for more information on how to properly define asset constraints.
 
     Parameters
     ----------
@@ -243,7 +609,7 @@ el.replaceWith(d);
     ValueError
         If the optimization fails or constraints are not satisfied.
 
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;  # noqa: E501
     n_assets = len(portfolio.names) - 1
 
     # Constraints
@@ -277,6 +643,61 @@ el.replaceWith(d);
     return result.x</code></pre>
 </details>
 <div class="desc"><p>Optimize the asset weights to achieve a target excess return over the expected liabilities return.</p>
+<p>This problem can be formulated as:</p>
+<p><span><span class="MathJax_Preview">
+\underset{\mathbf{W}}{\mathrm{maximize}} \quad
+\frac{\mathbf{W}^{T}\mathbf{R}}{\mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W}},
+</span><script type="math/tex; mode=display">
+\underset{\mathbf{W}}{\mathrm{maximize}} \quad
+\frac{\mathbf{W}^{T}\mathbf{R}}{\mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W}},
+</script></span></p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+\mathbf{W} &amp;=&amp; \big[
+w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+\mathbf{R} &amp;=&amp; \big[
+R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+\end{align*} \\
+</span><script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{W} &=& \big[
+w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+\mathbf{R} &=& \big[
+R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+\end{align*} \\
+</script></span></p>
+<p><span><span class="MathJax_Preview">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} &amp; \Sigma_{AL} \\
+\Sigma_{AL} &amp; \sigma^{2}_{L}
+\end{bmatrix},
+</span><script type="math/tex; mode=display">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} & \Sigma_{AL} \\
+\Sigma_{AL} & \sigma^{2}_{L}
+\end{bmatrix},
+</script></span></p>
+<p>where $\mathbf{W}$ is the vector of assets and liability weights, $\mathbf{R}$ is the vector of expected returns
+for the assets and liabilities, and $\mathbf{\Sigma}$ is the covariance matrix of the assets and liabilities.</p>
+<p>The last element of $\mathbf{W}$ corresponds to the liabilities. The liability weight is always set to -1.</p>
+<p>The optimization is subject to the following constraints:</p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+(1) &amp;\quad&amp; \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+(2) &amp;\quad&amp; w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+(3) &amp;\quad&amp; w_{n_{assets} + 1} = w_{L} = -1
+\end{align*}
+</span><script type="math/tex; mode=display">
+\begin{align*}
+(1) &\quad& \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+(2) &\quad& w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+(3) &\quad& w_{n_{assets} + 1} = w_{L} = -1
+\end{align*}
+</script></span></p>
+<p>If the <code>asset_constraints</code> parameter is provided by the user, the optimization will include these additional constraints.
+See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> for more details. A valid <code>asset_constraints</code> must fullfill a set of properties which are validated
+by the <code>penfolioop.constraints.AssetConstraints</code> class. Users are encouraged to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code>
+module and in particular the <code>penfolioop.constraints.AssetConstraints</code> class for more information on how to properly define asset constraints.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>portfolio</code></strong> :&ensp;<code>Portfolio</code></dt>
@@ -296,16 +717,71 @@ el.replaceWith(d);
 </dl></div>
 </dd>
 <dt id="penfolioop.optimizers.min_surplus_variance_optimizer"><code class="name flex">
-<span>def <span class="ident">min_surplus_variance_optimizer</span></span>(<span>portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None) ‑> np.ndarray</span>
+<span>def <span class="ident">min_surplus_variance_optimizer</span></span>(<span>portfolio: Portfolio,<br>asset_constraints: list[dict[str, Any]] | None = None,<br>surplus_return_lower_limit: float | None = None) ‑> np.ndarray</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def min_surplus_variance_optimizer(portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None,
+<pre><code class="python">def min_surplus_variance_optimizer(
+    portfolio: Portfolio, 
+    asset_constraints: list[dict[str, Any]] | None = None,
+    surplus_return_lower_limit: float | None = None,
 ) -&gt; np.ndarray:
-    &#34;&#34;&#34;Optimize the asset weights to minimize the surplus variance of the portfolio.
+    r&#34;&#34;&#34;Optimize the asset weights to minimize the surplus variance of the portfolio.
+
+    This optimization problem can be formulated as:
+
+    $$
+    \underset{\mathbf{W}}{\mathrm{minimize}} \quad \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W},
+    $$
+
+    $$
+    \begin{align*}
+    \mathbf{W} &amp;=&amp; \big[  w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+    \mathbf{R} &amp;=&amp; \big[  R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+    \end{align*} \\
+    $$
+
+    $$
+    \mathbf{\Sigma} = \begin{bmatrix}
+    \Sigma_{A} &amp; \Sigma_{AL} \\
+    \Sigma_{AL} &amp; \sigma^{2}_{L}
+    \end{bmatrix},
+    $$
+
+    where $\mathbf{W}$ is the vector of assets and liability weights, $\mathbf{R}$ is the vector of expected returns
+    for the assets and liabilities, and $\mathbf{\Sigma}$ is the covariance matrix of the assets and liabilities.
+
+    The last element of $\mathbf{W}$ corresponds to the liabilities. The liability weight is always set to -1.
+
+    The optimization is subject to the following general constraints:
+
+    $$
+    \begin{align*}
+    (1) &amp;\quad&amp; \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+    (2) &amp;\quad&amp; w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+    (3) &amp;\quad&amp; w_{n_{assets} + 1} = w_{L} = -1
+    \end{align*}
+    $$
+
+    Additionally, if the parameter `surplus_return_lower_limit` is provided by the user, 
+    we will add a surplus return lower limit constraint to the optimization problem:
+
+    $$
+    \mathbf{W}^{T} \mathbf{R} \geq \tilde{R}
+    $$,
+
+    where $\tilde{R}$ is the surplus return lower limit.
+
+
+    If the `asset_constraints` parameter is provided by the user, the optimization will include these
+    additional constraints. See `penfolioop.constraints` for more details. A valid `asset_constraints`
+    must fullfill a set of properties which are validated by the `penfolioop.constraints.AssetConstraints` class.
+    Users are encouraged to consult with the `penfolioop.constraints` module and in particular the 
+    `penfolioop.constraints.AssetConstraints` class for more information on how to properly define asset constraints.
+
 
     Parameters
     ----------
@@ -313,6 +789,8 @@ el.replaceWith(d);
         The portfolio object containing asset names, covariance matrix, expected returns.
     asset_constraints : list[dict[str, Any]], optional
         Additional constraints for the optimization problem. Default is None.
+    surplus_return_lower_limit : float, optional
+        The surplus return lower limit for the optimization problem. Default is None.
 
     Returns
     -------
@@ -337,10 +815,14 @@ el.replaceWith(d);
         weights[:n_assets] &gt;= 0,          # No short selling
         weights[-1] == -1,                # Last weight is liabilities
     ]
+    # Apply asset constraints if provided by user
     if asset_constraints:
         constraints += generate_constraints(
             portfolio_weights=weights, asset_constraints=asset_constraints, asset_names=portfolio.names
         )
+    # Apply surplus return lower limit constraint if provided by user
+    if surplus_return_lower_limit is not None:
+        constraints.append(weights.T @ portfolio.expected_returns &gt;= surplus_return_lower_limit)
     # Solve the optimization problem
     problem = cp.Problem(objective, constraints)
     problem.solve()
@@ -352,12 +834,76 @@ el.replaceWith(d);
     return weights.value</code></pre>
 </details>
 <div class="desc"><p>Optimize the asset weights to minimize the surplus variance of the portfolio.</p>
+<p>This optimization problem can be formulated as:</p>
+<p><span><span class="MathJax_Preview">
+\underset{\mathbf{W}}{\mathrm{minimize}} \quad \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W},
+</span><script type="math/tex; mode=display">
+\underset{\mathbf{W}}{\mathrm{minimize}} \quad \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W},
+</script></span></p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+\mathbf{W} &amp;=&amp; \big[
+w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+\mathbf{R} &amp;=&amp; \big[
+R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+\end{align*} \\
+</span><script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{W} &=& \big[
+w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+\mathbf{R} &=& \big[
+R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+\end{align*} \\
+</script></span></p>
+<p><span><span class="MathJax_Preview">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} &amp; \Sigma_{AL} \\
+\Sigma_{AL} &amp; \sigma^{2}_{L}
+\end{bmatrix},
+</span><script type="math/tex; mode=display">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} & \Sigma_{AL} \\
+\Sigma_{AL} & \sigma^{2}_{L}
+\end{bmatrix},
+</script></span></p>
+<p>where $\mathbf{W}$ is the vector of assets and liability weights, $\mathbf{R}$ is the vector of expected returns
+for the assets and liabilities, and $\mathbf{\Sigma}$ is the covariance matrix of the assets and liabilities.</p>
+<p>The last element of $\mathbf{W}$ corresponds to the liabilities. The liability weight is always set to -1.</p>
+<p>The optimization is subject to the following general constraints:</p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+(1) &amp;\quad&amp; \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+(2) &amp;\quad&amp; w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+(3) &amp;\quad&amp; w_{n_{assets} + 1} = w_{L} = -1
+\end{align*}
+</span><script type="math/tex; mode=display">
+\begin{align*}
+(1) &\quad& \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+(2) &\quad& w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+(3) &\quad& w_{n_{assets} + 1} = w_{L} = -1
+\end{align*}
+</script></span></p>
+<p>Additionally, if the parameter <code>surplus_return_lower_limit</code> is provided by the user,
+we will add a surplus return lower limit constraint to the optimization problem:</p>
+<p><span><span class="MathJax_Preview">
+\mathbf{W}^{T} \mathbf{R} \geq \tilde{R}
+</span><script type="math/tex; mode=display">
+\mathbf{W}^{T} \mathbf{R} \geq \tilde{R}
+</script></span>,</p>
+<p>where $\tilde{R}$ is the surplus return lower limit.</p>
+<p>If the <code>asset_constraints</code> parameter is provided by the user, the optimization will include these
+additional constraints. See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> for more details. A valid <code>asset_constraints</code>
+must fullfill a set of properties which are validated by the <code>penfolioop.constraints.AssetConstraints</code> class.
+Users are encouraged to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> module and in particular the
+<code>penfolioop.constraints.AssetConstraints</code> class for more information on how to properly define asset constraints.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>portfolio</code></strong> :&ensp;<code>Portfolio</code></dt>
 <dd>The portfolio object containing asset names, covariance matrix, expected returns.</dd>
 <dt><strong><code>asset_constraints</code></strong> :&ensp;<code>list[dict[str, Any]]</code>, optional</dt>
 <dd>Additional constraints for the optimization problem. Default is None.</dd>
+<dt><strong><code>surplus_return_lower_limit</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The surplus return lower limit for the optimization problem. Default is None.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -371,7 +917,7 @@ el.replaceWith(d);
 </dl></div>
 </dd>
 <dt id="penfolioop.optimizers.surplus_mean_variance_optimizer"><code class="name flex">
-<span>def <span class="ident">surplus_mean_variance_optimizer</span></span>(<span>portfolio: Portfolio,<br>lmbd: float = 1.0,<br>asset_constraints: list[dict[str, Any]] | None = None) ‑> np.ndarray</span>
+<span>def <span class="ident">surplus_mean_variance_optimizer</span></span>(<span>portfolio: Portfolio,<br>risk_aversion: float = 1.0,<br>asset_constraints: list[dict[str, Any]] | None = None) ‑> np.ndarray</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -379,9 +925,52 @@ el.replaceWith(d);
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def surplus_mean_variance_optimizer(
-    portfolio: Portfolio, lmbd: float = 1., asset_constraints: list[dict[str, Any]] | None = None,
+    portfolio: Portfolio, risk_aversion: float = 1., asset_constraints: list[dict[str, Any]] | None = None,
 ) -&gt; np.ndarray:
-    &#34;&#34;&#34;Optimize the asset weights to maximize the surplus return over the expected liabilities return.
+    r&#34;&#34;&#34;Optimize the asset weights to maximize the surplus return over the expected liabilities return.
+
+    This optimization problem can be formulated as:
+
+    $$
+    \underset{\mathbf{W}}{\mathrm{maximize}} \quad  \mathbf{W}^{T}\mathbf{R} -  \frac{\lambda}{2}  \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W},
+    $$
+
+    $$
+    \begin{align*}
+    \mathbf{W} &amp;=&amp; \big[  w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+    \mathbf{R} &amp;=&amp; \big[  R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+    \end{align*} \\
+    $$
+
+    $$
+    \mathbf{\Sigma} = \begin{bmatrix}
+    \Sigma_{A} &amp; \Sigma_{AL} \\
+    \Sigma_{AL} &amp; \sigma^{2}_{L}
+    \end{bmatrix},
+    $$
+
+    where $\mathbf{W}$ is the vector of assets and liability weights, $\mathbf{R}$ is the vector of expected returns
+    for the assets and liabilities, $\mathbf{\Sigma}$ is the covariance matrix of the assets and liabilities, and $\lambda$
+    is the risk aversion parameter.
+
+    The last element of $\mathbf{W}$ corresponds to the liabilities. The liability weight is always set to -1.
+
+
+    The optimization is subject to the following constraints:
+
+    $$
+    \begin{align*}
+    (1) &amp;\quad&amp; \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+    (2) &amp;\quad&amp; w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+    (3) &amp;\quad&amp; w_{n_{assets} + 1} = w_{L} = -1
+    \end{align*}
+    $$
+
+    If the `asset_constraints` parameter is provided by the user, the optimization will include these additional constraints.
+    See `penfolioop.constraints` for more details. A valid `asset_constraints` must fullfill a set of properties which are validated
+    by the `penfolioop.constraints.AssetConstraints` class. Users are encouraged to consult with the `penfolioop.constraints`
+    module and in particular the `penfolioop.constraints.AssetConstraints` class for more information on how to properly define asset constraints.
+
 
     Parameters
     ----------
@@ -402,14 +991,17 @@ el.replaceWith(d);
     ValueError
         If the optimization fails or constraints are not satisfied.
 
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;  # noqa: E501
+    if risk_aversion &lt; 0:
+        msg = &#34;Risk aversion must be non-negative.&#34;
+        raise ValueError(msg)
+
     n_assets = len(portfolio.names) - 1
     weights = cp.Variable(n_assets + 1)
-
     # Objective function: maximize the surplus return over the expected liabilities return
     surplus_return = weights.T @ portfolio.expected_returns
     surplus_variance = cp.quad_form(weights, portfolio.covariance_matrix)
-    objective = cp.Maximize(surplus_return - lmbd / 2 * surplus_variance)
+    objective = cp.Maximize(surplus_return - risk_aversion / 2 * surplus_variance)
     # Constraints
     constraints = [
         cp.sum(weights[:n_assets]) == 1,  # Weights must sum to 1
@@ -431,6 +1023,66 @@ el.replaceWith(d);
     return weights.value</code></pre>
 </details>
 <div class="desc"><p>Optimize the asset weights to maximize the surplus return over the expected liabilities return.</p>
+<p>This optimization problem can be formulated as:</p>
+<p><span><span class="MathJax_Preview">
+\underset{\mathbf{W}}{\mathrm{maximize}} \quad
+\mathbf{W}^{T}\mathbf{R} -
+\frac{\lambda}{2}
+\mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W},
+</span><script type="math/tex; mode=display">
+\underset{\mathbf{W}}{\mathrm{maximize}} \quad
+\mathbf{W}^{T}\mathbf{R} -
+\frac{\lambda}{2}
+\mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W},
+</script></span></p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+\mathbf{W} &amp;=&amp; \big[
+w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+\mathbf{R} &amp;=&amp; \big[
+R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+\end{align*} \\
+</span><script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{W} &=& \big[
+w_{1}, w_{2}, \ldots, w_{n_{assets}}, -1 \big]^{T}, \\
+\mathbf{R} &=& \big[
+R_{1}, R_{2}, \ldots, R_{n_{assets}}, R_{L} \big]^{T}, \\
+\end{align*} \\
+</script></span></p>
+<p><span><span class="MathJax_Preview">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} &amp; \Sigma_{AL} \\
+\Sigma_{AL} &amp; \sigma^{2}_{L}
+\end{bmatrix},
+</span><script type="math/tex; mode=display">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} & \Sigma_{AL} \\
+\Sigma_{AL} & \sigma^{2}_{L}
+\end{bmatrix},
+</script></span></p>
+<p>where $\mathbf{W}$ is the vector of assets and liability weights, $\mathbf{R}$ is the vector of expected returns
+for the assets and liabilities, $\mathbf{\Sigma}$ is the covariance matrix of the assets and liabilities, and $\lambda$
+is the risk aversion parameter.</p>
+<p>The last element of $\mathbf{W}$ corresponds to the liabilities. The liability weight is always set to -1.</p>
+<p>The optimization is subject to the following constraints:</p>
+<p><span><span class="MathJax_Preview">
+\begin{align*}
+(1) &amp;\quad&amp; \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+(2) &amp;\quad&amp; w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+(3) &amp;\quad&amp; w_{n_{assets} + 1} = w_{L} = -1
+\end{align*}
+</span><script type="math/tex; mode=display">
+\begin{align*}
+(1) &\quad& \sum_{i=1}^{n_{assets}} w_{i} = 1, \\
+(2) &\quad& w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
+(3) &\quad& w_{n_{assets} + 1} = w_{L} = -1
+\end{align*}
+</script></span></p>
+<p>If the <code>asset_constraints</code> parameter is provided by the user, the optimization will include these additional constraints.
+See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> for more details. A valid <code>asset_constraints</code> must fullfill a set of properties which are validated
+by the <code>penfolioop.constraints.AssetConstraints</code> class. Users are encouraged to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code>
+module and in particular the <code>penfolioop.constraints.AssetConstraints</code> class for more information on how to properly define asset constraints.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>portfolio</code></strong> :&ensp;<code>Portfolio</code></dt>
