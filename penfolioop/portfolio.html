@@ -39,9 +39,63 @@ el.replaceWith(d);
 </header>
 <section id="section-intro">
 <p>Portfolio optimization module.</p>
-<p>This module provides:
-- Portfolio: A dataclass representing a portfolio of assets and liabilities
-with methods for calculating returns, variance, and surplus metrics.</p>
+<p>This module provides:</p>
+<ul>
+<li><code><a title="penfolioop.portfolio.Portfolio" href="#penfolioop.portfolio.Portfolio">Portfolio</a></code>: A class representing a portfolio of assets and liabilities</li>
+</ul>
+<p>As a convention, we use the following notation:</p>
+<ul>
+<li>$\mathbf{R}$: The vector of expected returns of assets and liabilities.
+This is the <code>expected_returns</code> parameter needed to instantiate the <code><a title="penfolioop.portfolio.Portfolio" href="#penfolioop.portfolio.Portfolio">Portfolio</a></code> class.</li>
+</ul>
+<p><span><span class="MathJax_Preview">
+\mathbf{R} = \begin{bmatrix} r_1 \\ r_2 \\ \vdots \\ r_n \\ r_L \end{bmatrix},
+</span><script type="math/tex; mode=display">
+\mathbf{R} = \begin{bmatrix} r_1 \\ r_2 \\ \vdots \\ r_n \\ r_L \end{bmatrix},
+</script></span></p>
+<p>where $r_1, r_2, \ldots, r_n$ are the expected returns of the assets and $r_L$ is the expected return of the liabilities.
+The last element of $\mathbf{R}$ always corresponds to the liabilities.</p>
+<ul>
+<li>$\Sigma$: The total covariance matrix consisting of the covariance matrix of asset returns, the
+covariance between asset returns and liability returns, and the variance of liability returns.
+This is the <code>covariance_matrix</code> parameter needed to instantiate the <code><a title="penfolioop.portfolio.Portfolio" href="#penfolioop.portfolio.Portfolio">Portfolio</a></code> class.</li>
+</ul>
+<p><span><span class="MathJax_Preview">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} , \Sigma_{AL} \\
+\Sigma_{AL} , \sigma^{2}_{L}
+\end{bmatrix},
+</span><script type="math/tex; mode=display">
+\mathbf{\Sigma} = \begin{bmatrix}
+\Sigma_{A} , \Sigma_{AL} \\
+\Sigma_{AL} , \sigma^{2}_{L}
+\end{bmatrix},
+</script></span></p>
+<p>where <span><span class="MathJax_Preview"> \Sigma_{A} </span><script type="math/tex"> \Sigma_{A} </script></span> is a covariance matrix of the asset returns,
+<span><span class="MathJax_Preview"> \Sigma_{AL} </span><script type="math/tex"> \Sigma_{AL} </script></span> is the covariance between the assets and liabilities,
+and <span><span class="MathJax_Preview"> \sigma^{2}_{L} </span><script type="math/tex"> \sigma^{2}_{L} </script></span> is the variance of the liabilities.</p>
+<ul>
+<li>$\mathbf{W}$: The vector of weights of the assets and liabilities in the portfolio it is the output of the optimizers.
+The last element corresponds to the liability and it is always set to -1:</li>
+</ul>
+<p><span><span class="MathJax_Preview">
+\mathbf{W} = \begin{bmatrix}
+w_1 \\
+w_2 \\
+\vdots \\
+w_n \\
+-1
+\end{bmatrix},
+</span><script type="math/tex; mode=display">
+\mathbf{W} = \begin{bmatrix}
+w_1 \\
+w_2 \\
+\vdots \\
+w_n \\
+-1
+\end{bmatrix},
+</script></span>
+where <span><span class="MathJax_Preview"> w_1, w_2, \ldots, w_n </span><script type="math/tex"> w_1, w_2, \ldots, w_n </script></span> are the weights of the assets and -1 is the weight of the liabilities.</p>
 </section>
 <section>
 </section>
@@ -220,7 +274,7 @@ with methods for calculating returns, variance, and surplus metrics.</p>
             or if the last weight is not -1 (for liabilities).
 
         &#34;&#34;&#34;
-        if len(weights) != self.n_assets:
+        if len(weights) != self.n_assets + 1:
             msg = &#34;Weights must match the number of assets.&#34;
             raise ValueError(msg)
         if not np.isclose(np.sum(weights), 0):
@@ -257,7 +311,15 @@ with methods for calculating returns, variance, and surplus metrics.</p>
         return float(weights.T @ self.expected_returns)
 
     def surplus_variance(self, weights: np.ndarray) -&gt; float:
-        &#34;&#34;&#34;Calculate the surplus variance of the portfolio given the asset weights.
+        r&#34;&#34;&#34;Calculate the surplus variance of the portfolio given the asset weights.
+
+        The surplus variance is defined as the variance of the surplus return.
+
+        $$
+        \sigma^{2}_{s} = \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W} = \sum_{i=1}^{n_{assets}} \sum_{j=1}^{n_{assets}} w_{i} w_{j} \big(\Sigma_{A}\big)_{ij} - 2 \sum_{i=1}^{n_{assets}} w_{i} \big(\Sigma_{AL}\big)_{i} + \sigma^{2}_{L}
+        $$
+        where \( \mathbf{\Sigma} \) is the covariance matrix of the asset returns and liabilities, 
+        \( \mathbf{\Sigma}_{A} \) is the covariance matrix of the asset returns, \( \mathbf{\Sigma}_{AL} \) is the covariance vector between the assets and liabilities, and \( \sigma^{2}_{L} \) is the variance of the liabilities.
 
         Parameters
         ----------
@@ -269,12 +331,18 @@ with methods for calculating returns, variance, and surplus metrics.</p>
         float
             The surplus variance of the portfolio.
 
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;  # noqa: E501
         self.validate_weights(weights)
         return float(weights.T @ self.covariance_matrix @ weights)
 
     def portfolio_return(self, weights: np.ndarray) -&gt; float:
-        &#34;&#34;&#34;Calculate the return of the portfolio given the asset weights.
+        r&#34;&#34;&#34;Calculate the return of the portfolio given the asset weights.
+
+        The return of the portfolio is defined as the weighted sum of the returns of the assets.
+
+        $$
+        R_p = \sum_{i=1}^{n_{}} w_i R_i = \mathbf{W}_{assets}^{T} \mathbf{R}_{assets},
+        $$
 
         Parameters
         ----------
@@ -291,7 +359,13 @@ with methods for calculating returns, variance, and surplus metrics.</p>
         return float(weights[:-1].T @ self.expected_returns[:-1])
 
     def portfolio_variance(self, weights: np.ndarray) -&gt; float:
-        &#34;&#34;&#34;Calculate the variance of the portfolio given the weights.
+        r&#34;&#34;&#34;Calculate the variance of the portfolio given the weights.
+
+        The variance of the portfolio is defined as.
+
+        $$
+        \sigma^{2}_{p} = \mathbf{W}_{assets}^{T} \mathbf{\Sigma}_{A} \mathbf{W}_{assets}
+        $$
 
         Parameters
         ----------
@@ -438,7 +512,13 @@ def n_assets(self) -&gt; int:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def portfolio_return(self, weights: np.ndarray) -&gt; float:
-    &#34;&#34;&#34;Calculate the return of the portfolio given the asset weights.
+    r&#34;&#34;&#34;Calculate the return of the portfolio given the asset weights.
+
+    The return of the portfolio is defined as the weighted sum of the returns of the assets.
+
+    $$
+    R_p = \sum_{i=1}^{n_{}} w_i R_i = \mathbf{W}_{assets}^{T} \mathbf{R}_{assets},
+    $$
 
     Parameters
     ----------
@@ -455,6 +535,12 @@ def n_assets(self) -&gt; int:
     return float(weights[:-1].T @ self.expected_returns[:-1])</code></pre>
 </details>
 <div class="desc"><p>Calculate the return of the portfolio given the asset weights.</p>
+<p>The return of the portfolio is defined as the weighted sum of the returns of the assets.</p>
+<p><span><span class="MathJax_Preview">
+R_p = \sum_{i=1}^{n_{}} w_i R_i = \mathbf{W}_{assets}^{T} \mathbf{R}_{assets},
+</span><script type="math/tex; mode=display">
+R_p = \sum_{i=1}^{n_{}} w_i R_i = \mathbf{W}_{assets}^{T} \mathbf{R}_{assets},
+</script></span></p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>weights</code></strong> :&ensp;<code>np.ndarray</code></dt>
@@ -475,7 +561,13 @@ def n_assets(self) -&gt; int:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def portfolio_variance(self, weights: np.ndarray) -&gt; float:
-    &#34;&#34;&#34;Calculate the variance of the portfolio given the weights.
+    r&#34;&#34;&#34;Calculate the variance of the portfolio given the weights.
+
+    The variance of the portfolio is defined as.
+
+    $$
+    \sigma^{2}_{p} = \mathbf{W}_{assets}^{T} \mathbf{\Sigma}_{A} \mathbf{W}_{assets}
+    $$
 
     Parameters
     ----------
@@ -492,6 +584,12 @@ def n_assets(self) -&gt; int:
     return float(weights[:-1].T @ self.covariance_matrix[:-1, :-1] @ weights[:-1])</code></pre>
 </details>
 <div class="desc"><p>Calculate the variance of the portfolio given the weights.</p>
+<p>The variance of the portfolio is defined as.</p>
+<p><span><span class="MathJax_Preview">
+\sigma^{2}_{p} = \mathbf{W}_{assets}^{T} \mathbf{\Sigma}_{A} \mathbf{W}_{assets}
+</span><script type="math/tex; mode=display">
+\sigma^{2}_{p} = \mathbf{W}_{assets}^{T} \mathbf{\Sigma}_{A} \mathbf{W}_{assets}
+</script></span></p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>weights</code></strong> :&ensp;<code>np.ndarray</code></dt>
@@ -568,7 +666,15 @@ and $\mathbf{W} = \begin{bmatrix} w_1 \ w_2 \ \vdots \ w_n \ -1 \end{bmatrix}$ i
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def surplus_variance(self, weights: np.ndarray) -&gt; float:
-    &#34;&#34;&#34;Calculate the surplus variance of the portfolio given the asset weights.
+    r&#34;&#34;&#34;Calculate the surplus variance of the portfolio given the asset weights.
+
+    The surplus variance is defined as the variance of the surplus return.
+
+    $$
+    \sigma^{2}_{s} = \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W} = \sum_{i=1}^{n_{assets}} \sum_{j=1}^{n_{assets}} w_{i} w_{j} \big(\Sigma_{A}\big)_{ij} - 2 \sum_{i=1}^{n_{assets}} w_{i} \big(\Sigma_{AL}\big)_{i} + \sigma^{2}_{L}
+    $$
+    where \( \mathbf{\Sigma} \) is the covariance matrix of the asset returns and liabilities, 
+    \( \mathbf{\Sigma}_{A} \) is the covariance matrix of the asset returns, \( \mathbf{\Sigma}_{AL} \) is the covariance vector between the assets and liabilities, and \( \sigma^{2}_{L} \) is the variance of the liabilities.
 
     Parameters
     ----------
@@ -580,11 +686,19 @@ and $\mathbf{W} = \begin{bmatrix} w_1 \ w_2 \ \vdots \ w_n \ -1 \end{bmatrix}$ i
     float
         The surplus variance of the portfolio.
 
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;  # noqa: E501
     self.validate_weights(weights)
     return float(weights.T @ self.covariance_matrix @ weights)</code></pre>
 </details>
 <div class="desc"><p>Calculate the surplus variance of the portfolio given the asset weights.</p>
+<p>The surplus variance is defined as the variance of the surplus return.</p>
+<p><span><span class="MathJax_Preview">
+\sigma^{2}_{s} = \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W} = \sum_{i=1}^{n_{assets}} \sum_{j=1}^{n_{assets}} w_{i} w_{j} \big(\Sigma_{A}\big)_{ij} - 2 \sum_{i=1}^{n_{assets}} w_{i} \big(\Sigma_{AL}\big)_{i} + \sigma^{2}_{L}
+</span><script type="math/tex; mode=display">
+\sigma^{2}_{s} = \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W} = \sum_{i=1}^{n_{assets}} \sum_{j=1}^{n_{assets}} w_{i} w_{j} \big(\Sigma_{A}\big)_{ij} - 2 \sum_{i=1}^{n_{assets}} w_{i} \big(\Sigma_{AL}\big)_{i} + \sigma^{2}_{L}
+</script></span>
+where <span><span class="MathJax_Preview"> \mathbf{\Sigma} </span><script type="math/tex"> \mathbf{\Sigma} </script></span> is the covariance matrix of the asset returns and liabilities,
+<span><span class="MathJax_Preview"> \mathbf{\Sigma}_{A} </span><script type="math/tex"> \mathbf{\Sigma}_{A} </script></span> is the covariance matrix of the asset returns, <span><span class="MathJax_Preview"> \mathbf{\Sigma}_{AL} </span><script type="math/tex"> \mathbf{\Sigma}_{AL} </script></span> is the covariance vector between the assets and liabilities, and <span><span class="MathJax_Preview"> \sigma^{2}_{L} </span><script type="math/tex"> \sigma^{2}_{L} </script></span> is the variance of the liabilities.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>weights</code></strong> :&ensp;<code>np.ndarray</code></dt>
@@ -710,7 +824,7 @@ def validate_expected_returns(self) -&gt; Self:
         or if the last weight is not -1 (for liabilities).
 
     &#34;&#34;&#34;
-    if len(weights) != self.n_assets:
+    if len(weights) != self.n_assets + 1:
         msg = &#34;Weights must match the number of assets.&#34;
         raise ValueError(msg)
     if not np.isclose(np.sum(weights), 0):

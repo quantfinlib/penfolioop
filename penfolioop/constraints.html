@@ -42,6 +42,80 @@ el.replaceWith(d);
 <p>This module provides functionality for generating optimization constraints
 for portfolio management, including asset weight constraints and other
 portfolio-specific limitations.</p>
+<h2 id="user-constraints">User Constraints</h2>
+<p>Users of <code><a title="penfolioop" href="index.html">penfolioop</a></code> can define additional constraints on the asset classes in their portfolio.</p>
+<p>A valid constraints is a list of dictionaries, where each dictionary represents a constraint.</p>
+<p>Each constraint is a python dictionary and must include the following two keys:</p>
+<ul>
+<li><code>left_indices</code>: A list of asset names on the left-hand side of the constraint.</li>
+<li><code>operator</code>: The comparison operator for the constraint (e.g., "==", "&lt;=", "&gt;=").</li>
+</ul>
+<p>Additionally, each dictionary must include <strong><em>one and only one</em></strong> of the following two keys:</p>
+<ul>
+<li><code>right_value</code>: A numeric value for the right-hand side of the constraint (optional).</li>
+<li><code>right_indices</code>: A list of asset names on the right-hand side of the constraint (optional).</li>
+</ul>
+<p>Here are some valid constraints:</p>
+<pre><code class="language-python">[
+    {
+        &quot;left_indices&quot;: [&quot;asset_1&quot;, &quot;asset_2&quot;],
+        &quot;operator&quot;: &quot;&gt;=&quot;,
+        &quot;right_value&quot;: 0.5
+    },
+    {
+        &quot;left_indices&quot;: [&quot;asset_3&quot;],
+        &quot;operator&quot;: &quot;==&quot;,
+        &quot;right_indices&quot;: [&quot;asset_4&quot;]
+    }
+]
+</code></pre>
+<p>In this case, the constraints specify that the combined weight of <code>asset_1</code> and <code>asset_2</code>
+must be at least 0.5, while the weight of <code>asset_3</code> must be equal to the weight of <code>asset_4</code>.</p>
+<p>or </p>
+<pre><code class="language-python">[
+    {
+        &quot;left_indices&quot;: [&quot;asset_1&quot;, &quot;asset_2&quot;, &quot;asset_6&quot;],
+        &quot;operator&quot;: &quot;&lt;=&quot;,
+        &quot;right_value&quot;: [&quot;asset_4&quot;]
+    },
+    {
+        &quot;left_indices&quot;: [&quot;asset_3&quot;, &quot;asset_5&quot;],
+        &quot;operator&quot;: &quot;&gt;=&quot;,
+        &quot;right_value&quot;: 0.1
+    }
+]
+</code></pre>
+<p>In this case, the constraints specify that the combined weight of <code>asset_1</code>, <code>asset_2</code>,
+and <code>asset_6</code> must be less than or equal to the weight of <code>asset_4</code>,
+while the combined weight of <code>asset_3</code> and <code>asset_5</code> must be greater than or equal to 0.1.</p>
+<p>When the value corresponding to the <code>left_indices</code> is a list of assets,
+the constraint is applied to the combined weight of those assets.
+When the value of <code>left_indices</code> is a single asset, the constraint is applied to that asset's weight.</p>
+<p>The only allowed values for <code>operator</code> are:</p>
+<ul>
+<li><code>==</code>: Equal to</li>
+<li><code>&lt;=</code>: Less than or equal to</li>
+<li><code>&gt;=</code>: Greater than or equal to</li>
+</ul>
+<p>The permitted values for <code>right_value</code> and <code>right_indices</code> are as follows:</p>
+<ul>
+<li><code>right_value</code>: A numeric value which constrains the combined weight of the assets in <code>left_indices</code>.</li>
+<li><code>right_indices</code>: A list of asset names whose combined weight is used for the constraint.</li>
+</ul>
+<h2 id="module-content">Module Content</h2>
+<ul>
+<li><code><a title="penfolioop.constraints.AssetConstraint" href="#penfolioop.constraints.AssetConstraint">AssetConstraint</a></code></li>
+</ul>
+<p>This class is used to validate the constraints defined by the user.</p>
+<ul>
+<li><code><a title="penfolioop.constraints.generate_constraints" href="#penfolioop.constraints.generate_constraints">generate_constraints()</a></code> </li>
+</ul>
+<p>Converts the user defined constraints into CVXPY constraints.</p>
+<ul>
+<li><code><a title="penfolioop.constraints.generate_scipy_constraints" href="#penfolioop.constraints.generate_scipy_constraints">generate_scipy_constraints()</a></code></li>
+</ul>
+<p>Converts the user defined constraints into constraints that can be used by
+<code>scipy.optimize.minimize</code> function.</p>
 </section>
 <section>
 </section>
@@ -167,16 +241,16 @@ portfolio-specific limitations.</p>
                 right_value = sum(x[asset_indices[idx]] for idx in constraint[&#34;right_indices&#34;])
 
             # Return constraint value based on operator
-            if constraint[&#34;operator&#34;] in {&#34;&lt;=&#34;, &#34;&lt;&#34;}:
+            if constraint[&#34;operator&#34;] == &#34;&lt;=&#34;:
                 return right_value - left_value
-            if constraint[&#34;operator&#34;] in {&#34;&gt;=&#34;, &#34;&gt;&#34;}:
+            if constraint[&#34;operator&#34;] == &#34;&gt;=&#34;:
                 return left_value - right_value
             if constraint[&#34;operator&#34;] == &#34;==&#34;:
                 return left_value - right_value
             msg = f&#34;Unsupported operator: {constraint[&#39;operator&#39;]}&#34;
             raise ValueError(msg)
 
-        constraint_type = &#34;ineq&#34; if constraint[&#34;operator&#34;] in {&#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&gt;&#34;, &#34;&lt;&#34;} else &#34;eq&#34;
+        constraint_type = &#34;ineq&#34; if constraint[&#34;operator&#34;] in {&#34;&lt;=&#34;, &#34;&gt;=&#34;} else &#34;eq&#34;
         scipy_constraints.append({
             &#34;type&#34;: constraint_type,
             &#34;fun&#34;: constraint_fun,
@@ -253,17 +327,17 @@ portfolio-specific limitations.</p>
     # Validator for the operator
     @field_validator(&#34;operator&#34;)
     @classmethod
-    def validate_operator(cls, v: Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;]) -&gt; Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;]:
+    def validate_operator(cls, v: Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;]) -&gt; Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;]:
         &#34;&#34;&#34;Ensure operator is one of the allowed values.
 
         Parameters
         ----------
-        v : Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;]
+        v : Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;]
             The operator to validate.
 
         Returns
         -------
-        Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;]
+        Literal[&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;]
             Validated operator.
 
         Raises
@@ -272,7 +346,7 @@ portfolio-specific limitations.</p>
             If the operator is not one of the allowed values.
 
         &#34;&#34;&#34;
-        allowed_operators = {&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;, &#34;&lt;&#34;, &#34;&gt;&#34;}
+        allowed_operators = {&#34;==&#34;, &#34;&lt;=&#34;, &#34;&gt;=&#34;}
         if v not in allowed_operators:
             msg = f&#34;Operator must be one of {allowed_operators}, got {v}&#34;
             raise ValueError(msg)
@@ -331,7 +405,7 @@ portfolio-specific limitations.</p>
             If right_value is not None and is not a number or is negative.
 
         &#34;&#34;&#34;
-        if v is not None and not isinstance(v, (int, float)):
+        if v is not None and not isinstance(v, int | float):
             msg = &#34;right_value must be a number if provided&#34;
             raise ValueError(msg)
         if v is not None and (v &lt; 0 or v &gt; 1):
@@ -421,18 +495,18 @@ validated to form a valid model.</p>
 </dl></div>
 </dd>
 <dt id="penfolioop.constraints.AssetConstraint.validate_operator"><code class="name flex">
-<span>def <span class="ident">validate_operator</span></span>(<span>v: "Literal['==', '<=', '>=', '<', '>']") ‑> Literal['==', '<=', '>=', '<', '>']</span>
+<span>def <span class="ident">validate_operator</span></span>(<span>v: "Literal['==', '<=', '>=']") ‑> Literal['==', '<=', '>=']</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Ensure operator is one of the allowed values.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>v</code></strong> :&ensp;<code>Literal["==", "&lt;=", "&gt;=", "&lt;", "&gt;"]</code></dt>
+<dt><strong><code>v</code></strong> :&ensp;<code>Literal["==", "&lt;=", "&gt;="]</code></dt>
 <dd>The operator to validate.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Literal["==", "&lt;=", "&gt;=", "&lt;", "&gt;"]</code></dt>
+<dt><code>Literal["==", "&lt;=", "&gt;="]</code></dt>
 <dd>Validated operator.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
@@ -538,7 +612,10 @@ def validate_right_side(self) -&gt; Self:
 </article>
 <nav id="sidebar">
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#user-constraints">User Constraints</a></li>
+<li><a href="#module-content">Module content</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>

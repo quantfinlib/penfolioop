@@ -166,6 +166,47 @@ and the surplus variance (variance of the surplus returns) in the following way.
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="penfolioop.optimizers.clean_up_weight_decorator"><code class="name flex">
+<span>def <span class="ident">clean_up_weight_decorator</span></span>(<span>func: Callable[..., np.ndarray]) ‑> Callable[..., numpy.ndarray]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clean_up_weight_decorator(func: Callable[..., np.ndarray]) -&gt; Callable[..., np.ndarray]:
+    &#34;&#34;&#34;Make a decorator to clean up weights after optimization.
+
+    Parameters
+    ----------
+    func : callable
+        The optimization function to decorate.
+
+    Returns
+    -------
+    callable
+        The decorated optimization function.
+    &#34;&#34;&#34;
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+        # Call the original optimization function
+        result = func(*args, **kwargs)
+        return _clean_up_weights(result)
+    return wrapper</code></pre>
+</details>
+<div class="desc"><p>Make a decorator to clean up weights after optimization.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>func</code></strong> :&ensp;<code>callable</code></dt>
+<dd>The optimization function to decorate.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>callable</code></dt>
+<dd>The decorated optimization function.</dd>
+</dl></div>
+</dd>
 <dt id="penfolioop.optimizers.efficient_frontier"><code class="name flex">
 <span>def <span class="ident">efficient_frontier</span></span>(<span>portfolio: Portfolio,<br>asset_constraints: list[dict[str, Any]] | None = None,<br>surplus_return_range: tuple[float, float] = (0, 1)) ‑> dict[str, np.ndarray]</span>
 </code></dt>
@@ -251,7 +292,7 @@ and the surplus variance (variance of the surplus returns) in the following way.
         weights = min_surplus_variance_optimizer(
             portfolio=portfolio,
             asset_constraints=asset_constraints,
-            surplus_return_lower_limit=target_return
+            surplus_return_lower_limit=target_return,
         )
         weights_placeholder.append(weights)
         surplus_return_place_holder.append(portfolio.surplus_return(weights))
@@ -348,7 +389,8 @@ See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.c
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def max_surplus_return_optimizer(
+<pre><code class="python">@clean_up_weight_decorator
+def max_surplus_return_optimizer(
     portfolio: Portfolio,
     asset_constraints: list[dict[str, Any]] | None = None,
     surplus_risk_upper_limit: float | None = None,
@@ -400,8 +442,8 @@ See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.c
 
     If the `asset_constraints` parameter is provided by the user, the optimization will include these additional
     constraints. See `penfolioop.constraints` for more details. A valid `asset_constraints` must fulfill a set
-    of properties which are validated by the `penfolioop.constraints.AssetConstraints` class. Users are encouraged
-    to consult with the `penfolioop.constraints` module and in particular the `penfolioop.constraints.AssetConstraints`
+    of properties which are validated by the `penfolioop.constraints.AssetConstraint` class. Users are encouraged
+    to consult with the `penfolioop.constraints` module and in particular the `penfolioop.constraints.AssetConstraint`
     class for more information on how to properly define asset constraints.
 
     Parameters
@@ -513,8 +555,8 @@ constraint to the optimization problem:</p>
 </script></span>, where $\sigma$ is the surplus risk upper limit.</p>
 <p>If the <code>asset_constraints</code> parameter is provided by the user, the optimization will include these additional
 constraints. See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> for more details. A valid <code>asset_constraints</code> must fulfill a set
-of properties which are validated by the <code>penfolioop.constraints.AssetConstraints</code> class. Users are encouraged
-to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> module and in particular the <code>penfolioop.constraints.AssetConstraints</code>
+of properties which are validated by the <code><a title="penfolioop.constraints.AssetConstraint" href="constraints.html#penfolioop.constraints.AssetConstraint">AssetConstraint</a></code> class. Users are encouraged
+to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> module and in particular the <code><a title="penfolioop.constraints.AssetConstraint" href="constraints.html#penfolioop.constraints.AssetConstraint">AssetConstraint</a></code>
 class for more information on how to properly define asset constraints.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -544,7 +586,8 @@ class for more information on how to properly define asset constraints.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def max_surplus_sharp_ratio_optimizer(
+<pre><code class="python">@clean_up_weight_decorator
+def max_surplus_sharp_ratio_optimizer(
     portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None,
 ) -&gt; np.ndarray:
     r&#34;&#34;&#34;Optimize the asset weights to achieve a target excess return over the expected liabilities return.
@@ -588,8 +631,8 @@ class for more information on how to properly define asset constraints.</p>
 
     If the `asset_constraints` parameter is provided by the user, the optimization will include these additional constraints.
     See `penfolioop.constraints` for more details. A valid `asset_constraints` must fullfill a set of properties which are validated
-    by the `penfolioop.constraints.AssetConstraints` class. Users are encouraged to consult with the `penfolioop.constraints`
-    module and in particular the `penfolioop.constraints.AssetConstraints` class for more information on how to properly define asset constraints.
+    by the `penfolioop.constraints.AssetConstraint` class. Users are encouraged to consult with the `penfolioop.constraints`
+    module and in particular the `penfolioop.constraints.AssetConstraint` class for more information on how to properly define asset constraints.
 
     Parameters
     ----------
@@ -696,8 +739,8 @@ for the assets and liabilities, and $\mathbf{\Sigma}$ is the covariance matrix o
 </script></span></p>
 <p>If the <code>asset_constraints</code> parameter is provided by the user, the optimization will include these additional constraints.
 See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> for more details. A valid <code>asset_constraints</code> must fullfill a set of properties which are validated
-by the <code>penfolioop.constraints.AssetConstraints</code> class. Users are encouraged to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code>
-module and in particular the <code>penfolioop.constraints.AssetConstraints</code> class for more information on how to properly define asset constraints.</p>
+by the <code><a title="penfolioop.constraints.AssetConstraint" href="constraints.html#penfolioop.constraints.AssetConstraint">AssetConstraint</a></code> class. Users are encouraged to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code>
+module and in particular the <code><a title="penfolioop.constraints.AssetConstraint" href="constraints.html#penfolioop.constraints.AssetConstraint">AssetConstraint</a></code> class for more information on how to properly define asset constraints.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>portfolio</code></strong> :&ensp;<code>Portfolio</code></dt>
@@ -724,7 +767,8 @@ module and in particular the <code>penfolioop.constraints.AssetConstraints</code
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def min_surplus_variance_optimizer(
+<pre><code class="python">@clean_up_weight_decorator
+def min_surplus_variance_optimizer(
     portfolio: Portfolio, 
     asset_constraints: list[dict[str, Any]] | None = None,
     surplus_return_lower_limit: float | None = None,
@@ -778,9 +822,9 @@ module and in particular the <code>penfolioop.constraints.AssetConstraints</code
 
     If the `asset_constraints` parameter is provided by the user, the optimization will include these
     additional constraints. See `penfolioop.constraints` for more details. A valid `asset_constraints`
-    must fullfill a set of properties which are validated by the `penfolioop.constraints.AssetConstraints` class.
+    must fullfill a set of properties which are validated by the `penfolioop.constraints.AssetConstraint` class.
     Users are encouraged to consult with the `penfolioop.constraints` module and in particular the 
-    `penfolioop.constraints.AssetConstraints` class for more information on how to properly define asset constraints.
+    `penfolioop.constraints.AssetConstraint` class for more information on how to properly define asset constraints.
 
 
     Parameters
@@ -893,9 +937,9 @@ we will add a surplus return lower limit constraint to the optimization problem:
 <p>where $\tilde{R}$ is the surplus return lower limit.</p>
 <p>If the <code>asset_constraints</code> parameter is provided by the user, the optimization will include these
 additional constraints. See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> for more details. A valid <code>asset_constraints</code>
-must fullfill a set of properties which are validated by the <code>penfolioop.constraints.AssetConstraints</code> class.
+must fullfill a set of properties which are validated by the <code><a title="penfolioop.constraints.AssetConstraint" href="constraints.html#penfolioop.constraints.AssetConstraint">AssetConstraint</a></code> class.
 Users are encouraged to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> module and in particular the
-<code>penfolioop.constraints.AssetConstraints</code> class for more information on how to properly define asset constraints.</p>
+<code><a title="penfolioop.constraints.AssetConstraint" href="constraints.html#penfolioop.constraints.AssetConstraint">AssetConstraint</a></code> class for more information on how to properly define asset constraints.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>portfolio</code></strong> :&ensp;<code>Portfolio</code></dt>
@@ -924,7 +968,8 @@ Users are encouraged to consult with the <code><a title="penfolioop.constraints"
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def surplus_mean_variance_optimizer(
+<pre><code class="python">@clean_up_weight_decorator
+def surplus_mean_variance_optimizer(
     portfolio: Portfolio, risk_aversion: float = 1., asset_constraints: list[dict[str, Any]] | None = None,
 ) -&gt; np.ndarray:
     r&#34;&#34;&#34;Optimize the asset weights to maximize the surplus return over the expected liabilities return.
@@ -968,8 +1013,8 @@ Users are encouraged to consult with the <code><a title="penfolioop.constraints"
 
     If the `asset_constraints` parameter is provided by the user, the optimization will include these additional constraints.
     See `penfolioop.constraints` for more details. A valid `asset_constraints` must fullfill a set of properties which are validated
-    by the `penfolioop.constraints.AssetConstraints` class. Users are encouraged to consult with the `penfolioop.constraints`
-    module and in particular the `penfolioop.constraints.AssetConstraints` class for more information on how to properly define asset constraints.
+    by the `penfolioop.constraints.AssetConstraint` class. Users are encouraged to consult with the `penfolioop.constraints`
+    module and in particular the `penfolioop.constraints.AssetConstraint` class for more information on how to properly define asset constraints.
 
 
     Parameters
@@ -1081,8 +1126,8 @@ is the risk aversion parameter.</p>
 </script></span></p>
 <p>If the <code>asset_constraints</code> parameter is provided by the user, the optimization will include these additional constraints.
 See <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code> for more details. A valid <code>asset_constraints</code> must fullfill a set of properties which are validated
-by the <code>penfolioop.constraints.AssetConstraints</code> class. Users are encouraged to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code>
-module and in particular the <code>penfolioop.constraints.AssetConstraints</code> class for more information on how to properly define asset constraints.</p>
+by the <code><a title="penfolioop.constraints.AssetConstraint" href="constraints.html#penfolioop.constraints.AssetConstraint">AssetConstraint</a></code> class. Users are encouraged to consult with the <code><a title="penfolioop.constraints" href="constraints.html">penfolioop.constraints</a></code>
+module and in particular the <code><a title="penfolioop.constraints.AssetConstraint" href="constraints.html#penfolioop.constraints.AssetConstraint">AssetConstraint</a></code> class for more information on how to properly define asset constraints.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>portfolio</code></strong> :&ensp;<code>Portfolio</code></dt>
@@ -1120,6 +1165,7 @@ module and in particular the <code>penfolioop.constraints.AssetConstraints</code
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="penfolioop.optimizers.clean_up_weight_decorator" href="#penfolioop.optimizers.clean_up_weight_decorator">clean_up_weight_decorator</a></code></li>
 <li><code><a title="penfolioop.optimizers.efficient_frontier" href="#penfolioop.optimizers.efficient_frontier">efficient_frontier</a></code></li>
 <li><code><a title="penfolioop.optimizers.max_surplus_return_optimizer" href="#penfolioop.optimizers.max_surplus_return_optimizer">max_surplus_return_optimizer</a></code></li>
 <li><code><a title="penfolioop.optimizers.max_surplus_sharp_ratio_optimizer" href="#penfolioop.optimizers.max_surplus_sharp_ratio_optimizer">max_surplus_sharp_ratio_optimizer</a></code></li>
