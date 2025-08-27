@@ -26,16 +26,16 @@ R_L
 \end{bmatrix}
 $$
 
-`covariance_matrix` $\mathbf{\Sigma} $ is the covariance matrix of the asset and the liability returns.
+`covariance_matrix` $\Sigma$ is the covariance matrix of the asset and the liability returns.
 
 $$
-\mathbf{\Sigma} = \begin{bmatrix}
-\mathbf{\Sigma}_{A} & \mathbf{\Sigma}_{AL} \\
-\mathbf{\Sigma}_{AL} & \sigma^{2}_{L}
+\Sigma = \begin{bmatrix}
+\Sigma_{A} & \Sigma_{AL} \\
+\Sigma_{AL} & \sigma^{2}_{L}
 \end{bmatrix},
 $$
 
-where $\mathbf{\Sigma}_{A}$ is the covariance matrix of the asset returns, $\mathbf{\Sigma}_{AL}$ is a vector of the covariance between the asset and liability returns, and $\sigma^{2}_{L}$ is the variance of the liability returns.
+where $\Sigma_{A}$ is the covariance matrix of the asset returns, $\Sigma_{AL}$ is a vector of the covariance between the asset and liability returns, and $\sigma^{2}_{L}$ is the variance of the liability returns.
 
 The output of the optimization process is a weight vector $\mathbf{W}$ consisting of the optimal asset weights, and the liability weight is always set to -1. The optimization process aims to find the asset weights that maximize or minimize the chosen objective function while satisfying the specified constraints.
 
@@ -54,16 +54,10 @@ $$
 
 `surplus_return` $\mathbf{R}_{S}$ is the return of the portfolio minus the return of the liabilities.
 
-$$
-\mathbf{R}_{S} = \mathbf{R}_{P} - \mathbf{R}_{L} = \mathbf{W}_{A} ^ {T}\mathbf{R}_{A} - \mathbf{R}_{L} = \mathbf{W} ^ {T} \mathbf{R}
-$$
+$$R_{S} = R_{P} - R_{L} = W_{A} ^ {T}R_{A} - R_{L} = W ^ {T} R$$
 
 
-`surplus_variance` $\sigma^{2}_{S}$ is the variance of the surplus returns.
-
-$$
-\sigma^{2}_{S} = \mathbf{W}_{A}^{T} \mathbf{\Sigma}_{A} \mathbf{W}_{A} - 2 \mathbf{W}_{A}^{T} \mathbf{\Sigma}_{AL} + \sigma^{2}_{L} = \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W}
-$$
+`surplus_variance` $\sigma^{2}_{S}$ is the variance of the surplus returns: $`\sigma^{2}_{S} = W_{A}^{T} \Sigma_{A} W_{A} - 2 W_{A}^{T} \Sigma_{AL} + \sigma^{2}_{L} = W^{T} \Sigma W `$
 
 ## Optimizers
 
@@ -72,7 +66,7 @@ All the optimizers are subject to these general constraints:
 
 $$
     \begin{align*}
-    (1) &\quad& \sum_{i=1}^{n_{assets}} w_{i} = \mathrm{SUM}(\mathbf{W}_{A}) = 1, \\
+    (1) &\quad& \sum_{i=1}^{n_{assets}} w_{i} = \mathrm{SUM}(W_{A}) = 1, \\
     (2) &\quad& w_{i} \geq 0, \quad \forall i \in \{1, \ldots, n_{assets}\}, \\
     (3) &\quad& w_{L} = -1
     \end{align*}
