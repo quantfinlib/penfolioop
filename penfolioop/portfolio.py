@@ -1,10 +1,54 @@
 # Copyright (c) 2025, Mohammadjavad Vakili
 
-"""Portfolio optimization module.
+r"""Portfolio optimization module.
 
 This module provides:
-- Portfolio: A dataclass representing a portfolio of assets and liabilities
-  with methods for calculating returns, variance, and surplus metrics.
+
+- `Portfolio`: A class representing a portfolio of assets and liabilities
+
+
+As a convention, we use the following notation:
+
+- $\mathbf{R}$: The vector of expected returns of assets and liabilities.
+This is the `expected_returns` parameter needed to instantiate the `Portfolio` class.
+
+$$
+\mathbf{R} = \begin{bmatrix} r_1 \\ r_2 \\ \vdots \\ r_n \\ r_L \end{bmatrix},
+$$
+
+where $r_1, r_2, \ldots, r_n$ are the expected returns of the assets and $r_L$ is the expected return of the liabilities.
+The last element of $\mathbf{R}$ always corresponds to the liabilities.
+
+
+- $\Sigma$: The total covariance matrix consisting of the covariance matrix of asset returns, the
+covariance between asset returns and liability returns, and the variance of liability returns.
+This is the `covariance_matrix` parameter needed to instantiate the `Portfolio` class.
+
+$$
+\mathbf{\Sigma} = \begin{bmatrix}
+ \Sigma_{A} , \Sigma_{AL} \\
+ \Sigma_{AL} , \sigma^{2}_{L}
+\end{bmatrix},
+$$
+
+where \( \Sigma_{A} \) is a covariance matrix of the asset returns,
+\( \Sigma_{AL} \) is the covariance between the assets and liabilities,
+and \( \sigma^{2}_{L} \) is the variance of the liabilities.
+
+
+- $\mathbf{W}$: The vector of weights of the assets and liabilities in the portfolio it is the output of the optimizers.
+The last element corresponds to the liability and it is always set to -1:
+
+$$
+\mathbf{W} = \begin{bmatrix}
+ w_1 \\
+ w_2 \\
+ \vdots \\
+ w_n \\
+ -1
+\end{bmatrix},
+$$
+where \( w_1, w_2, \ldots, w_n \) are the weights of the assets and -1 is the weight of the liabilities.
 """
 from typing import Self
 
@@ -171,7 +215,7 @@ class Portfolio(BaseModel):
             or if the last weight is not -1 (for liabilities).
 
         """
-        if len(weights) != self.n_assets:
+        if len(weights) != self.n_assets + 1:
             msg = "Weights must match the number of assets."
             raise ValueError(msg)
         if not np.isclose(np.sum(weights), 0):
@@ -208,7 +252,15 @@ class Portfolio(BaseModel):
         return float(weights.T @ self.expected_returns)
 
     def surplus_variance(self, weights: np.ndarray) -> float:
-        """Calculate the surplus variance of the portfolio given the asset weights.
+        r"""Calculate the surplus variance of the portfolio given the asset weights.
+
+        The surplus variance is defined as the variance of the surplus return.
+
+        $$
+        \sigma^{2}_{s} = \mathbf{W}^{T} \mathbf{\Sigma} \mathbf{W} = \sum_{i=1}^{n_{assets}} \sum_{j=1}^{n_{assets}} w_{i} w_{j} \big(\Sigma_{A}\big)_{ij} - 2 \sum_{i=1}^{n_{assets}} w_{i} \big(\Sigma_{AL}\big)_{i} + \sigma^{2}_{L}
+        $$
+        where \( \mathbf{\Sigma} \) is the covariance matrix of the asset returns and liabilities, 
+        \( \mathbf{\Sigma}_{A} \) is the covariance matrix of the asset returns, \( \mathbf{\Sigma}_{AL} \) is the covariance vector between the assets and liabilities, and \( \sigma^{2}_{L} \) is the variance of the liabilities.
 
         Parameters
         ----------
@@ -220,12 +272,18 @@ class Portfolio(BaseModel):
         float
             The surplus variance of the portfolio.
 
-        """
+        """  # noqa: E501
         self.validate_weights(weights)
         return float(weights.T @ self.covariance_matrix @ weights)
 
     def portfolio_return(self, weights: np.ndarray) -> float:
-        """Calculate the return of the portfolio given the asset weights.
+        r"""Calculate the return of the portfolio given the asset weights.
+
+        The return of the portfolio is defined as the weighted sum of the returns of the assets.
+
+        $$
+        R_p = \sum_{i=1}^{n_{}} w_i R_i = \mathbf{W}_{assets}^{T} \mathbf{R}_{assets},
+        $$
 
         Parameters
         ----------
@@ -242,7 +300,13 @@ class Portfolio(BaseModel):
         return float(weights[:-1].T @ self.expected_returns[:-1])
 
     def portfolio_variance(self, weights: np.ndarray) -> float:
-        """Calculate the variance of the portfolio given the weights.
+        r"""Calculate the variance of the portfolio given the weights.
+
+        The variance of the portfolio is defined as.
+
+        $$
+        \sigma^{2}_{p} = \mathbf{W}_{assets}^{T} \mathbf{\Sigma}_{A} \mathbf{W}_{assets}
+        $$
 
         Parameters
         ----------
@@ -257,4 +321,3 @@ class Portfolio(BaseModel):
         """
         self.validate_weights(weights)
         return float(weights[:-1].T @ self.covariance_matrix[:-1, :-1] @ weights[:-1])
-

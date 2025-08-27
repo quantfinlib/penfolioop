@@ -103,7 +103,8 @@ For the sake of clarity on the conventions used in this module, we repeat some o
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from functools import wraps
+from typing import TYPE_CHECKING, Any, Callable
 
 import cvxpy as cp
 import numpy as np
@@ -113,6 +114,56 @@ from penfolioop.constraints import generate_constraints, generate_scipy_constrai
 
 if TYPE_CHECKING:
     from penfolioop.portfolio import Portfolio
+
+
+MINISCULE_WEIGHT_THRESHOLD = 1e-6
+
+
+def _clean_up_weights(weights: np.ndarray) -> np.ndarray:
+    """Clean up the weights by ensuring they sum to 1 and the last weight is -1.
+
+    Parameters
+    ----------
+    weights : np.ndarray
+        The weights to clean up.
+
+    Returns
+    -------
+    np.ndarray
+        The cleaned-up weights.
+    """
+    weights = weights.copy()
+    # set small negative weights to zero
+    weights[weights < 0] = 0
+    # set miniscule weights to zero
+    weights[np.abs(weights) < MINISCULE_WEIGHT_THRESHOLD] = 0
+    # make sure the asset weights sum to 1
+    weights[:-1] /= weights[:-1].sum()
+    # make sure the liability weight is -1
+    weights[-1] = -1
+    return weights
+
+
+def clean_up_weight_decorator(func: Callable[..., np.ndarray]) -> Callable[..., np.ndarray]:
+    """Make a decorator to clean up weights after optimization.
+
+    Parameters
+    ----------
+    func : callable
+        The optimization function to decorate.
+
+    Returns
+    -------
+    callable
+        The decorated optimization function.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+        # Call the original optimization function
+        result = func(*args, **kwargs)
+        return _clean_up_weights(result)
+    return wrapper
 
 
 def _negative_surplus_sharp_ratio_objective(
@@ -143,6 +194,7 @@ def _negative_surplus_sharp_ratio_objective(
     return -surplus_return / np.sqrt(surplus_variance)
 
 
+@clean_up_weight_decorator
 def max_surplus_sharp_ratio_optimizer(
     portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None,
 ) -> np.ndarray:
@@ -187,8 +239,8 @@ def max_surplus_sharp_ratio_optimizer(
 
     If the `asset_constraints` parameter is provided by the user, the optimization will include these additional constraints.
     See `penfolioop.constraints` for more details. A valid `asset_constraints` must fullfill a set of properties which are validated
-    by the `penfolioop.constraints.AssetConstraints` class. Users are encouraged to consult with the `penfolioop.constraints`
-    module and in particular the `penfolioop.constraints.AssetConstraints` class for more information on how to properly define asset constraints.
+    by the `penfolioop.constraints.AssetConstraint` class. Users are encouraged to consult with the `penfolioop.constraints`
+    module and in particular the `penfolioop.constraints.AssetConstraint` class for more information on how to properly define asset constraints.
 
     Parameters
     ----------
@@ -242,6 +294,7 @@ def max_surplus_sharp_ratio_optimizer(
     return result.x
 
 
+@clean_up_weight_decorator
 def surplus_mean_variance_optimizer(
     portfolio: Portfolio, risk_aversion: float = 1., asset_constraints: list[dict[str, Any]] | None = None,
 ) -> np.ndarray:
@@ -286,8 +339,8 @@ def surplus_mean_variance_optimizer(
 
     If the `asset_constraints` parameter is provided by the user, the optimization will include these additional constraints.
     See `penfolioop.constraints` for more details. A valid `asset_constraints` must fullfill a set of properties which are validated
-    by the `penfolioop.constraints.AssetConstraints` class. Users are encouraged to consult with the `penfolioop.constraints`
-    module and in particular the `penfolioop.constraints.AssetConstraints` class for more information on how to properly define asset constraints.
+    by the `penfolioop.constraints.AssetConstraint` class. Users are encouraged to consult with the `penfolioop.constraints`
+    module and in particular the `penfolioop.constraints.AssetConstraint` class for more information on how to properly define asset constraints.
 
 
     Parameters
@@ -341,6 +394,7 @@ def surplus_mean_variance_optimizer(
     return weights.value
 
 
+@clean_up_weight_decorator
 def max_surplus_return_optimizer(
     portfolio: Portfolio,
     asset_constraints: list[dict[str, Any]] | None = None,
@@ -393,8 +447,8 @@ def max_surplus_return_optimizer(
 
     If the `asset_constraints` parameter is provided by the user, the optimization will include these additional
     constraints. See `penfolioop.constraints` for more details. A valid `asset_constraints` must fulfill a set
-    of properties which are validated by the `penfolioop.constraints.AssetConstraints` class. Users are encouraged
-    to consult with the `penfolioop.constraints` module and in particular the `penfolioop.constraints.AssetConstraints`
+    of properties which are validated by the `penfolioop.constraints.AssetConstraint` class. Users are encouraged
+    to consult with the `penfolioop.constraints` module and in particular the `penfolioop.constraints.AssetConstraint`
     class for more information on how to properly define asset constraints.
 
     Parameters
@@ -448,6 +502,7 @@ def max_surplus_return_optimizer(
     return weights.value
 
 
+@clean_up_weight_decorator
 def min_surplus_variance_optimizer(
     portfolio: Portfolio, 
     asset_constraints: list[dict[str, Any]] | None = None,
@@ -502,9 +557,9 @@ def min_surplus_variance_optimizer(
 
     If the `asset_constraints` parameter is provided by the user, the optimization will include these
     additional constraints. See `penfolioop.constraints` for more details. A valid `asset_constraints`
-    must fullfill a set of properties which are validated by the `penfolioop.constraints.AssetConstraints` class.
+    must fullfill a set of properties which are validated by the `penfolioop.constraints.AssetConstraint` class.
     Users are encouraged to consult with the `penfolioop.constraints` module and in particular the 
-    `penfolioop.constraints.AssetConstraints` class for more information on how to properly define asset constraints.
+    `penfolioop.constraints.AssetConstraint` class for more information on how to properly define asset constraints.
 
 
     Parameters
@@ -635,7 +690,7 @@ def efficient_frontier(
         weights = min_surplus_variance_optimizer(
             portfolio=portfolio,
             asset_constraints=asset_constraints,
-            surplus_return_lower_limit=target_return
+            surplus_return_lower_limit=target_return,
         )
         weights_placeholder.append(weights)
         surplus_return_place_holder.append(portfolio.surplus_return(weights))

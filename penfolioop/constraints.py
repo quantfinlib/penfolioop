@@ -5,6 +5,99 @@
 This module provides functionality for generating optimization constraints
 for portfolio management, including asset weight constraints and other
 portfolio-specific limitations.
+
+
+User Constraints
+----------------
+
+Users of `penfolioop` can define additional constraints on the asset classes in their portfolio.
+
+A valid constraints is a list of dictionaries, where each dictionary represents a constraint.
+
+Each constraint is a python dictionary and must include the following two keys:
+
+- `left_indices`: A list of asset names on the left-hand side of the constraint.
+- `operator`: The comparison operator for the constraint (e.g., "==", "<=", ">=").
+
+Additionally, each dictionary must include ***one and only one*** of the following two keys:
+
+- `right_value`: A numeric value for the right-hand side of the constraint (optional).
+- `right_indices`: A list of asset names on the right-hand side of the constraint (optional).
+
+Here are some valid constraints:
+
+```python
+[
+    {
+        "left_indices": ["asset_1", "asset_2"],
+        "operator": ">=",
+        "right_value": 0.5
+    },
+    {
+        "left_indices": ["asset_3"],
+        "operator": "==",
+        "right_indices": ["asset_4"]
+    }
+]
+```
+
+In this case, the constraints specify that the combined weight of `asset_1` and `asset_2`
+must be at least 0.5, while the weight of `asset_3` must be equal to the weight of `asset_4`.
+
+or 
+
+```python
+[
+    {
+        "left_indices": ["asset_1", "asset_2", "asset_6"],
+        "operator": "<=",
+        "right_value": ["asset_4"]
+    },
+    {
+        "left_indices": ["asset_3", "asset_5"],
+        "operator": ">=",
+        "right_value": 0.1
+    }
+]
+```
+
+In this case, the constraints specify that the combined weight of `asset_1`, `asset_2`,
+and `asset_6` must be less than or equal to the weight of `asset_4`,
+while the combined weight of `asset_3` and `asset_5` must be greater than or equal to 0.1.
+
+When the value corresponding to the `left_indices` is a list of assets,
+the constraint is applied to the combined weight of those assets.
+When the value of `left_indices` is a single asset, the constraint is applied to that asset's weight.
+
+The only allowed values for `operator` are:
+
+- `==`: Equal to
+- `<=`: Less than or equal to
+- `>=`: Greater than or equal to
+
+The permitted values for `right_value` and `right_indices` are as follows:
+
+- `right_value`: A numeric value which constrains the combined weight of the assets in `left_indices`.
+- `right_indices`: A list of asset names whose combined weight is used for the constraint.
+
+
+Module content
+--------------
+
+
+- `AssetConstraint`
+
+This class is used to validate the constraints defined by the user.
+
+ - `generate_constraints` 
+
+ Converts the user defined constraints into CVXPY constraints.
+
+ - `generate_scipy_constraints`
+
+ Converts the user defined constraints into constraints that can be used by
+ `scipy.optimize.minimize` function.
+
 """
 
 from __future__ import annotations
@@ -57,17 +150,17 @@ class AssetConstraint(BaseModel):
     # Validator for the operator
     @field_validator("operator")
     @classmethod
-    def validate_operator(cls, v: Literal["==", "<=", ">=", "<", ">"]) -> Literal["==", "<=", ">=", "<", ">"]:
+    def validate_operator(cls, v: Literal["==", "<=", ">="]) -> Literal["==", "<=", ">="]:
         """Ensure operator is one of the allowed values.
 
         Parameters
         ----------
-        v : Literal["==", "<=", ">=", "<", ">"]
+        v : Literal["==", "<=", ">="]
             The operator to validate.
 
         Returns
         -------
-        Literal["==", "<=", ">=", "<", ">"]
+        Literal["==", "<=", ">="]
             Validated operator.
 
         Raises
@@ -76,7 +169,7 @@ class AssetConstraint(BaseModel):
             If the operator is not one of the allowed values.
 
         """
-        allowed_operators = {"==", "<=", ">=", "<", ">"}
+        allowed_operators = {"==", "<=", ">="}
         if v not in allowed_operators:
             msg = f"Operator must be one of {allowed_operators}, got {v}"
             raise ValueError(msg)
@@ -135,7 +228,7 @@ class AssetConstraint(BaseModel):
             If right_value is not None and is not a number or is negative.
 
         """
-        if v is not None and not isinstance(v, (int, float)):
+        if v is not None and not isinstance(v, int | float):
             msg = "right_value must be a number if provided"
             raise ValueError(msg)
         if v is not None and (v < 0 or v > 1):
@@ -262,7 +355,7 @@ def _process_right_side_of_constraint(
 
 
 def _process_operator(
-    operator: Literal["==", "<=", ">=", "<", ">"],
+    operator: Literal["==", "<=", ">="],
     left_expr: cp.Expression,
     right_expr: cp.Expression | float,
 ) -> cp.Constraint:
@@ -270,7 +363,7 @@ def _process_operator(
 
     Parameters
     ----------
-    operator : Literal["==", "<=", ">=", "<", ">"]
+    operator : Literal["==", "<=", ">="]
         The operator to apply to the left and right expressions.
 
     left_expr : cp.Expression
@@ -296,10 +389,6 @@ def _process_operator(
         return left_expr <= right_expr
     if operator == ">=":
         return left_expr >= right_expr
-    if operator == "<":
-        return left_expr < right_expr
-    if operator == ">":
-        return left_expr > right_expr
     msg = f"Unknown operator: {operator}"
     raise ValueError(msg)
 
@@ -390,16 +479,16 @@ def generate_scipy_constraints(
                 right_value = sum(x[asset_indices[idx]] for idx in constraint["right_indices"])
 
             # Return constraint value based on operator
-            if constraint["operator"] in {"<=", "<"}:
+            if constraint["operator"] == "<=":
                 return right_value - left_value
-            if constraint["operator"] in {">=", ">"}:
+            if constraint["operator"] == ">=":
                 return left_value - right_value
             if constraint["operator"] == "==":
                 return left_value - right_value
             msg = f"Unsupported operator: {constraint['operator']}"
             raise ValueError(msg)
 
-        constraint_type = "ineq" if constraint["operator"] in {"<=", ">=", ">", "<"} else "eq"
+        constraint_type = "ineq" if constraint["operator"] in {"<=", ">="} else "eq"
         scipy_constraints.append({
             "type": constraint_type,
             "fun": constraint_fun,
