@@ -1,10 +1,10 @@
 # PenFolioOp
 Portfolio Optimizations for *Pension Funds*
 
-[![codecov](https://codecov.io/gh/quantfinlib/heavy-tail/graph/badge.svg?token=Z60B2PYJ44)](https://codecov.io/gh/quantfinlib/penfolioop)
-[![tests](https://github.com/quantfinlib/heavy-tail/actions/workflows/test.yml/badge.svg)](https://github.com/quantfinlib/heavy-tail/actions/workflows/test.yml)
-[![docs](https://github.com/quantfinlib/heavy-tail/actions/workflows/gh-pages.yml/badge.svg)](https://github.com/quantfinlib/heavy-tail/actions/workflows/gh-pages.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/quantfinlib/heavy-tail/blob/main/LICENSE)
+[![codecov](https://codecov.io/gh/quantfinlib/penfolioop/graph/badge.svg?token=Z60B2PYJ44)](https://codecov.io/gh/quantfinlib/penfolioop)
+[![tests](https://github.com/quantfinlib/penfolioop/actions/workflows/test.yml/badge.svg)](https://github.com/quantfinlib/penfolioop/actions/workflows/test.yml)
+[![docs](https://github.com/quantfinlib/penfolioop/actions/workflows/gh-pages.yml/badge.svg)](https://github.com/quantfinlib/penfolioop/actions/workflows/gh-pages.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/quantfinlib/penfolioop/blob/main/LICENSE)
 
 
 ## Conventions
