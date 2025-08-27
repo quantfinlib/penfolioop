@@ -44,3 +44,4 @@ __pycache__/*
 *.ipynb_checkpoints/*
 *.coverage.*
 dev/*
+uv.lock

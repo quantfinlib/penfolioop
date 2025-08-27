@@ -2,15 +2,13 @@
 
 
 [🌐 **GitHub**](https://github.com/quantfinlib/penfolioop)
-
-[📖 **Documentation**](https://quantfinlib.github.io/penfolioop/)
 &nbsp;&nbsp;&nbsp; [🔗 **API**](penfolioop)
 &nbsp;&nbsp;&nbsp; [📖 **Docs**](https://quantfinlib.github.io/penfolioop/)
 
 
 ## Getting Started
 
-* [Basic example with synthetic data](Example_Synthetic_data.html)
+* [Basic example with US Asset Classes](Example_US_Asset_Classes.html)
 
 
 ## Documentation

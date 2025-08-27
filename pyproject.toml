@@ -6,6 +6,18 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["numpy", "pandas", "cvxpy","pydantic"]
 
+[build-system]
+requires = ["uv_build>=0.8.13,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+package = true
+
+[tool.uv.build-backend]
+module-name = "penfolioop"
+module-root = ""
+
+
 
 [project.optional-dependencies]
 dev = [
@@ -15,6 +27,8 @@ dev = [
 docs = [
     "pdoc3",
     "matplotlib",
+    "plotly",
+    "seaborn",
     "nbformat==5.4.0",
     "ipython", 
     "notebook", 

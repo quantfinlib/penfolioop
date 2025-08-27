@@ -142,18 +142,18 @@ def test_optimizer(portfolio, optimizer, asset_constraints1, asset_constraints2,
     assert weights_multiple_constraints.shape[0] == len(portfolio.names)
 
 
-@pytest.mark.parametrize('lmbd', [0, 0.1, 1.0, 10.0])
+@pytest.mark.parametrize('risk_aversion', [0, 0.1, 1.0, 10.0])
 # Test for lambda in mean-variance optimizer
-def test_mean_variance_optimizer_lambda(portfolio, lmbd):
-    weights = surplus_mean_variance_optimizer(portfolio, lmbd=lmbd)
+def test_mean_variance_optimizer_lambda(portfolio, risk_aversion):
+    weights = surplus_mean_variance_optimizer(portfolio, risk_aversion=risk_aversion)
     generic_weight_requirements(weights, len(portfolio.names))
 
 def test_mean_variance_variance_properties(portfolio):
     lmbds = np.linspace(0, 1, 100)
     vars = []
     rets = []
-    for lmbd in lmbds:
-        weights = surplus_mean_variance_optimizer(portfolio, lmbd=lmbd)
+    for risk_aversion in lmbds:
+        weights = surplus_mean_variance_optimizer(portfolio, risk_aversion=risk_aversion)
         variance = portfolio.surplus_variance(weights)
         vars.append(variance)
         return_ = portfolio.surplus_return(weights)
@@ -166,21 +166,17 @@ def test_mean_variance_variance_properties(portfolio):
 
 
 def test_efficient_frontier(portfolio):
-    num_points = 100
-    ws, srs, svs = efficient_frontier(portfolio, num_points=num_points)
+    results = efficient_frontier(portfolio, surplus_return_range=(0, 0.01))
 
-    assert isinstance(ws, np.ndarray)
-    assert isinstance(srs, np.ndarray)
-    assert isinstance(svs, np.ndarray)
-
-    assert ws.shape[0] == num_points
-    assert srs.shape[0] == num_points
-    assert svs.shape[0] == num_points
+    ws = results["weights"]
+    srs = results["surplus_returns"]
+    svs = results["surplus_variances"]
 
     for w in ws:
         generic_weight_requirements(w, len(portfolio.names))
 
     # Check if surplus returns and variances are calculated correctly
-    for i in range(num_points):
+    for i in range(len(srs)):
         assert np.isclose(srs[i], portfolio.surplus_return(ws[i]))
         assert np.isclose(svs[i], portfolio.surplus_variance(ws[i]))
+    

@@ -7,8 +7,8 @@ import pytest
 import cvxpy as cp
 
 
-VALID_OPERATORS = ['==', '>=', '<=', '>', '<']
-INVALID_OPERATORS = ['!=', '==>', '>=<', '>>', '<<', 'gt', 'lt', 'eq', 'geq', 'leq']
+VALID_OPERATORS = ['==', '>=', '<=']
+INVALID_OPERATORS = ['!=', '==>', '>=<', '>>', '<<', 'gt', 'lt', 'eq', 'geq', 'leq', '>', '<']
 OPERATORS = VALID_OPERATORS + INVALID_OPERATORS
 
 
@@ -275,12 +275,12 @@ def test_generate_scipy_constraints():
         },
         {
             'left_indices': ['asset_0'],
-            'operator': '>',
+            'operator': '>=',
             'right_value': 0.3
         },
         {
             'left_indices': ['asset_1'],
-            'operator': '<',
+            'operator': '<=',
             'right_value': 0.3
         }
     ]
