@@ -4,7 +4,7 @@ r"""Portfolio optimization and objective functions.
 
 This module provides various objective functions for pension fund portfolio optimization, including:
 
-- `max_surplus_sharp_ratio_optimizer`: 
+- `max_surplus_sharpe_ratio_optimizer`: 
 
 This function Maximizes the surplus portfolio return to surplus portfolio risk.
 
@@ -166,7 +166,7 @@ def clean_up_weight_decorator(func: Callable[..., np.ndarray]) -> Callable[..., 
     return wrapper
 
 
-def _negative_surplus_sharp_ratio_objective(
+def _negative_surplus_sharpe_ratio_objective(
     weights: np.ndarray, expected_returns: np.ndarray, covariance_matrix: np.ndarray,
 ) -> float:
     """Construct an objective function to maximize the Sharpe ratio of the portfolio surplus.
@@ -195,7 +195,7 @@ def _negative_surplus_sharp_ratio_objective(
 
 
 @clean_up_weight_decorator
-def max_surplus_sharp_ratio_optimizer(
+def max_surplus_sharpe_ratio_optimizer(
     portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None,
 ) -> np.ndarray:
     r"""Optimize the asset weights to achieve a target excess return over the expected liabilities return.
@@ -280,7 +280,7 @@ def max_surplus_sharp_ratio_optimizer(
 
     # Solve the optimization problem
     result = minimize(
-        _negative_surplus_sharp_ratio_objective,
+        _negative_surplus_sharpe_ratio_objective,
         initial_weights,
         args=(portfolio.expected_returns, portfolio.covariance_matrix),
         method="SLSQP",

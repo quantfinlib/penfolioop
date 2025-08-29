@@ -95,7 +95,7 @@ Asset weight constraints can be applied to ensure that the portfolio adheres to 
 ## Example
 
 Usage of the library is straightforward. You can create a portfolio object, define your assets, and then use the optimizers to find the optimal asset weights based on your constraints and objectives.
-The first step is to create a `Portfolio` object with your assets, their expected returns, and covariances. The last item in the list of assets should be the liability, which is treated differently from the other assets in the optimization process. The optimizaters always set the liability weight to -1 and require the other asset weights to be between 0 and 1 and sum to 1.
+The first step is to create a `Portfolio` object with your assets, their expected returns, and covariances. The last item in the list of assets should be the liability, which is treated differently ,from the other assets in the optimization process. The optimizaters always set the liability weight to -1 and require the other asset weights to be between 0 and 1 and sum to 1.
 
 The user can then define additional constraints on the asset weights, such as requiring a minimum or maximum weight for certain assets or limiting the weight of one or more assets to be less than another.
 
