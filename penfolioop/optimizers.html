@@ -41,7 +41,7 @@ el.replaceWith(d);
 <p>Portfolio optimization and objective functions.</p>
 <p>This module provides various objective functions for pension fund portfolio optimization, including:</p>
 <ul>
-<li><code><a title="penfolioop.optimizers.max_surplus_sharp_ratio_optimizer" href="#penfolioop.optimizers.max_surplus_sharp_ratio_optimizer">max_surplus_sharp_ratio_optimizer()</a></code>: </li>
+<li><code><a title="penfolioop.optimizers.max_surplus_sharpe_ratio_optimizer" href="#penfolioop.optimizers.max_surplus_sharpe_ratio_optimizer">max_surplus_sharpe_ratio_optimizer()</a></code>: </li>
 </ul>
 <p>This function Maximizes the surplus portfolio return to surplus portfolio risk.</p>
 <ul>
@@ -578,8 +578,8 @@ class for more information on how to properly define asset constraints.</p>
 <dd>If the optimization fails or constraints are not satisfied.</dd>
 </dl></div>
 </dd>
-<dt id="penfolioop.optimizers.max_surplus_sharp_ratio_optimizer"><code class="name flex">
-<span>def <span class="ident">max_surplus_sharp_ratio_optimizer</span></span>(<span>portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None) ‑> np.ndarray</span>
+<dt id="penfolioop.optimizers.max_surplus_sharpe_ratio_optimizer"><code class="name flex">
+<span>def <span class="ident">max_surplus_sharpe_ratio_optimizer</span></span>(<span>portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None) ‑> np.ndarray</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -587,7 +587,7 @@ class for more information on how to properly define asset constraints.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@clean_up_weight_decorator
-def max_surplus_sharp_ratio_optimizer(
+def max_surplus_sharpe_ratio_optimizer(
     portfolio: Portfolio, asset_constraints: list[dict[str, Any]] | None = None,
 ) -&gt; np.ndarray:
     r&#34;&#34;&#34;Optimize the asset weights to achieve a target excess return over the expected liabilities return.
@@ -672,7 +672,7 @@ def max_surplus_sharp_ratio_optimizer(
 
     # Solve the optimization problem
     result = minimize(
-        _negative_surplus_sharp_ratio_objective,
+        _negative_surplus_sharpe_ratio_objective,
         initial_weights,
         args=(portfolio.expected_returns, portfolio.covariance_matrix),
         method=&#34;SLSQP&#34;,
@@ -1168,7 +1168,7 @@ module and in particular the <code><a title="penfolioop.constraints.AssetConstra
 <li><code><a title="penfolioop.optimizers.clean_up_weight_decorator" href="#penfolioop.optimizers.clean_up_weight_decorator">clean_up_weight_decorator</a></code></li>
 <li><code><a title="penfolioop.optimizers.efficient_frontier" href="#penfolioop.optimizers.efficient_frontier">efficient_frontier</a></code></li>
 <li><code><a title="penfolioop.optimizers.max_surplus_return_optimizer" href="#penfolioop.optimizers.max_surplus_return_optimizer">max_surplus_return_optimizer</a></code></li>
-<li><code><a title="penfolioop.optimizers.max_surplus_sharp_ratio_optimizer" href="#penfolioop.optimizers.max_surplus_sharp_ratio_optimizer">max_surplus_sharp_ratio_optimizer</a></code></li>
+<li><code><a title="penfolioop.optimizers.max_surplus_sharpe_ratio_optimizer" href="#penfolioop.optimizers.max_surplus_sharpe_ratio_optimizer">max_surplus_sharpe_ratio_optimizer</a></code></li>
 <li><code><a title="penfolioop.optimizers.min_surplus_variance_optimizer" href="#penfolioop.optimizers.min_surplus_variance_optimizer">min_surplus_variance_optimizer</a></code></li>
 <li><code><a title="penfolioop.optimizers.surplus_mean_variance_optimizer" href="#penfolioop.optimizers.surplus_mean_variance_optimizer">surplus_mean_variance_optimizer</a></code></li>
 </ul>
