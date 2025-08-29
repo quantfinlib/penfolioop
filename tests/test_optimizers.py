@@ -3,7 +3,7 @@ from penfolioop.optimizers import (
     min_surplus_variance_optimizer,
     surplus_mean_variance_optimizer,
     max_surplus_return_optimizer,
-    max_surplus_sharp_ratio_optimizer,
+    max_surplus_sharpe_ratio_optimizer,
     efficient_frontier
 )
 
@@ -104,7 +104,7 @@ def generic_weight_requirements(weights: np.ndarray, expected_length: int):
     min_surplus_variance_optimizer,
     surplus_mean_variance_optimizer,
     max_surplus_return_optimizer,
-    max_surplus_sharp_ratio_optimizer])
+    max_surplus_sharpe_ratio_optimizer])
 def test_optimizer(portfolio, optimizer, asset_constraints1, asset_constraints2, invalid_asset_constraints):
     
     # Test with asset constraints 1
