@@ -25,4 +25,5 @@ $ uv pip install -e .[docs]
 Then
 ```bash
 $ uv run pdoc --html  -c latex_math=True --output-dir docs --force penfolioop
+$ uv run jupyter nbconvert --to html --execute --allow-errors docs/*.ipynb
 ```
