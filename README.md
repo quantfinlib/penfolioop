@@ -5,7 +5,7 @@ Portfolio Optimizations for *Pension Funds*
 [![tests](https://github.com/quantfinlib/penfolioop/actions/workflows/test.yml/badge.svg)](https://github.com/quantfinlib/penfolioop/actions/workflows/test.yml)
 [![docs](https://github.com/quantfinlib/penfolioop/actions/workflows/gh-pages.yml/badge.svg)](https://github.com/quantfinlib/penfolioop/actions/workflows/gh-pages.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/quantfinlib/penfolioop/blob/main/LICENSE)
-
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/penfolioop?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/penfolioop)
 
 ## Conventions
 
